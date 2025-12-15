@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 
-export default function SuccessPage() {
+function SuccessContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const sessionId = searchParams.get('session_id');
@@ -17,7 +17,6 @@ export default function SuccessPage() {
     const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
     const [message, setMessage] = useState('Verifying payment details...');
 
-    
     const processedRef = useRef(false);
 
     useEffect(() => {
@@ -32,7 +31,6 @@ export default function SuccessPage() {
 
         const verifyAndRecord = async () => {
             try {
-                
                 const res = await fetch('/api/verify_payment', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -42,12 +40,10 @@ export default function SuccessPage() {
                 const data = await res.json();
 
                 if (data.status === 'paid') {
-                    
                     const q = query(collection(db, 'payments'), where('stripeSessionId', '==', sessionId));
                     const existing = await getDocs(q);
 
                     if (existing.empty) {
-                        
                         await addDoc(collection(db, 'payments'), {
                             paymentId: 'PAY-' + Date.now(),
                             studentId: studentId,
@@ -124,5 +120,17 @@ export default function SuccessPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function SuccessPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex h-screen items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+            </div>
+        }>
+            <SuccessContent />
+        </Suspense>
     );
 }

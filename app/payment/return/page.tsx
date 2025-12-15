@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
@@ -8,7 +8,7 @@ import { db } from '@/lib/firebase';
 import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 import { createReceipt } from '@/lib/receiptUtils';
 
-export default function ReturnPage() {
+function ReturnContent() {
     const searchParams = useSearchParams();
     const sessionId = searchParams.get('session_id');
     const studentId = searchParams.get('studentId');
@@ -20,7 +20,7 @@ export default function ReturnPage() {
 
     useEffect(() => {
         if (!sessionId) {
-            
+
             setStatus('error');
             setMessage('Invalid session.');
             return;
@@ -31,7 +31,7 @@ export default function ReturnPage() {
 
         const verifyAndRecord = async () => {
             try {
-                
+
                 const res = await fetch('/api/verify_payment', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -41,12 +41,12 @@ export default function ReturnPage() {
                 const data = await res.json();
 
                 if (data.status === 'paid' || data.status === 'complete') {
-                    
+
                     const q = query(collection(db, 'payments'), where('stripeSessionId', '==', sessionId));
                     const existing = await getDocs(q);
 
                     if (existing.empty && studentId && amount) {
-                        
+
                         const pRef = await addDoc(collection(db, 'payments'), {
                             paymentId: 'PAY-' + Date.now(),
                             studentId: studentId,
@@ -56,7 +56,7 @@ export default function ReturnPage() {
                             createdAt: Date.now()
                         });
 
-                        
+
                         await createReceipt({
                             amount: Number(amount),
                             paymentId: pRef.id,
@@ -68,7 +68,7 @@ export default function ReturnPage() {
                     setStatus('success');
                     setMessage('Payment successful! Your fees have been updated.');
                 } else if (data.status === 'open') {
-                    
+
                     setStatus('error');
                     setMessage('Payment was not completed.');
                 } else {
@@ -150,5 +150,17 @@ export default function ReturnPage() {
                 </Link>
             </div>
         </div>
+    );
+}
+
+export default function ReturnPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex h-screen items-center justify-center bg-[#0C1417] text-white">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div>
+            </div>
+        }>
+            <ReturnContent />
+        </Suspense>
     );
 }
