@@ -8,11 +8,14 @@ export interface UserProfile {
 }
 
 export interface StudentProfile {
-    studentId: string; 
+    studentId?: string; // Kept for legacy compatibility
+    userId: string;
     name: string;
+    email: string;
     class: string;
-    parentEmail: string;
-    userId: string; 
+    section?: string;
+    transportFee?: number;
+    parentEmail?: string; // Kept for legacy compatibility
 }
 
 export interface FeeStructure {
@@ -26,16 +29,19 @@ export interface FeeStructure {
 export interface Payment {
     paymentId: string;
     studentId: string;
+    userId: string;
     amount: number;
-    status: 'pending' | 'paid';
+    paymentStatus: 'pending' | 'success' | 'failed' | 'cancelled';
     stripeSessionId: string;
-    createdAt: number; 
+    createdAt: number;
+    updatedAt: number;
 }
 
 export interface Receipt {
-    receiptId: string; 
+    receiptId: string;
     receiptNumber: string;
     studentId: string;
+    userId: string;
     studentName: string;
     class: string;
     feeType: string;
@@ -44,5 +50,5 @@ export interface Receipt {
     transactionId: string;
     paymentStatus: string;
     paidAt: number;
-    generatedBy: string; 
+    generatedBy: string;
 }

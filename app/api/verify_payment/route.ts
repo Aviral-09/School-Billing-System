@@ -1,9 +1,8 @@
 import Stripe from 'stripe';
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/firebase';
 
-
-apiVersion: '2025-01-27.acacia' as any,
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    // apiVersion: '2025-01-27.acacia', 
 });
 
 export async function POST(req: NextRequest) {
@@ -17,7 +16,8 @@ export async function POST(req: NextRequest) {
         } else {
             return NextResponse.json({ status: 'unpaid' }, { status: 400 });
         }
-    } catch (err: any) {
-        return NextResponse.json({ error: err.message }, { status: 500 });
+    } catch (err: unknown) {
+        const error = err as Error;
+        return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

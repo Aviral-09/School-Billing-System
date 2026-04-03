@@ -19,7 +19,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@antigravity/sdk": ["./lib/antigravity-sdk.ts"]
     }
   },
   "include": [

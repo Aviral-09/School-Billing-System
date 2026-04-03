@@ -1,290 +1,281 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Navbar from '@/components/Navbar';
 import { useAuth } from '@/context/AuthContext';
 import { db } from '@/lib/firebase';
-import { collection, query, where, getDocs, onSnapshot } from 'firebase/firestore';
-import { StudentProfile, FeeStructure, Payment, Receipt } from '@/types';
+import { collection, query, where, getDocs, onSnapshot, orderBy } from 'firebase/firestore';
+import { StudentProfile, FeeStructure, Payment } from '@/types';
+import Navbar from '@/components/Navbar';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { SCHOOL_CONFIG } from '@/lib/schoolConfig';
+import {
+    CreditCardIcon,
+    ClockIcon,
+    CheckCircleIcon,
+    ExclamationCircleIcon,
+    ArrowUpRightIcon
+} from '@heroicons/react/24/outline';
 
 export default function StudentDashboard() {
     const { user, role, loading: authLoading } = useAuth();
     const router = useRouter();
-
     const [student, setStudent] = useState<StudentProfile | null>(null);
     const [feeDetails, setFeeDetails] = useState<FeeStructure | null>(null);
     const [payments, setPayments] = useState<Payment[]>([]);
-    const [receiptMap, setReceiptMap] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(true);
 
-    
     useEffect(() => {
-        if (!authLoading) {
-            if (!user) {
-                router.push('/login');
-            } else if (role !== 'student') {
-                
-            }
+        if (!authLoading && !user) {
+            router.push('/login');
+            return;
+        }
+        if (role === 'admin') {
+            router.push('/admin/dashboard');
+            return;
         }
     }, [user, role, authLoading, router]);
 
-    
     useEffect(() => {
         if (!user) return;
 
-        const fetchStudentData = async () => {
+        const fetchData = async () => {
             try {
-                
-                const q = query(collection(db, 'students'), where('userId', '==', user.uid));
-                const querySnapshot = await getDocs(q);
+                // Fetch Student Profile linked to this Auth User
+                const studentQuery = query(collection(db, 'students'), where('userId', '==', user.uid));
+                const studentSnap = await getDocs(studentQuery);
 
-                if (!querySnapshot.empty) {
-                    const studentData = querySnapshot.docs[0].data() as StudentProfile;
+                if (!studentSnap.empty) {
+                    const studentData = studentSnap.docs[0].data() as StudentProfile;
                     setStudent(studentData);
 
-                    
-                    const feeQ = query(collection(db, 'fees'), where('className', '==', studentData.class));
-                    const feeSnap = await getDocs(feeQ);
+                    // Fetch Fee Structure for student's class
+                    const feeQuery = query(collection(db, 'fees'), where('className', '==', studentData.class));
+                    const feeSnap = await getDocs(feeQuery);
                     if (!feeSnap.empty) {
                         setFeeDetails(feeSnap.docs[0].data() as FeeStructure);
                     }
 
-                    
-                    const paymentsRef = collection(db, 'payments');
-                    const paymentsQ = query(paymentsRef, where('studentId', '==', studentData.studentId));
+                    // Fetch Payments with real-time updates
+                    const paymentsQuery = query(
+                        collection(db, 'payments'),
+                        where('userId', '==', user.uid),
+                        orderBy('createdAt', 'desc')
+                    );
 
-                    const unsubPayments = onSnapshot(paymentsQ, (snapshot) => {
-                        const paymentList: Payment[] = [];
-                        snapshot.forEach((doc) => {
-                            paymentList.push(doc.data() as Payment);
-                        });
-                        paymentList.sort((a, b) => b.createdAt - a.createdAt);
-                        setPayments(paymentList);
+                    const unsubscribe = onSnapshot(paymentsQuery, (snapshot) => {
+                        const paymentsList = snapshot.docs.map(doc => doc.data() as Payment);
+                        setPayments(paymentsList);
+                        setLoading(false);
                     });
 
-                    
-                    const receiptsRef = collection(db, 'receipts');
-                    const receiptsQ = query(receiptsRef, where('studentId', '==', studentData.studentId));
-
-                    const unsubReceipts = onSnapshot(receiptsQ, (snapshot) => {
-                        const rMap: Record<string, string> = {};
-                        snapshot.forEach((doc) => {
-                            const data = doc.data() as Receipt;
-                            rMap[data.transactionId] = doc.id;
-                        });
-                        setReceiptMap(rMap);
-                    });
-
-                    return () => {
-                        unsubPayments();
-                        unsubReceipts();
-                    };
+                    return unsubscribe;
+                } else {
+                    setLoading(false);
                 }
-            } catch (err) {
-                console.error("Error fetching data:", err);
-            } finally {
+            } catch (error) {
+                console.error("Dashboard Fetch Error:", error);
                 setLoading(false);
             }
         };
 
-        fetchStudentData();
+        fetchData();
     }, [user]);
 
     if (authLoading || loading) {
         return (
-            <div className="flex h-screen items-center justify-center bg-slate-900 text-white">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div>
+            <div className="flex h-screen items-center justify-center bg-black">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-500"></div>
             </div>
         );
     }
 
-    
-    const totalPaid = payments
-        .filter(p => p.status === 'paid')
-        .reduce((sum, p) => sum + p.amount, 0);
-
-    const totalDue = feeDetails ? feeDetails.totalFee - totalPaid : 0;
-
-    
-    const getStatusStyle = (status: 'paid' | 'pending' | 'overdue' | string) => {
-        switch (status) {
-            case 'paid': return 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
-            case 'pending': return 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
-            case 'overdue': return 'bg-red-500/10 text-red-400 border border-red-500/20';
-            default: return 'bg-slate-500/10 text-slate-400 border border-slate-500/20';
-        }
-    };
-
-    return (
-        <div className="min-h-screen text-slate-200 font-sans selection:bg-emerald-500/30">
-            <Navbar />
-
-            <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-                {}
-                <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
-                    <div>
-                        <p className="text-emerald-400 font-medium text-sm mb-2 tracking-wider uppercase">Academic Year 2023-2024</p>
-                        <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
-                            Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">{student?.name.split(' ')[0]}</span>
-                        </h1>
-                        <p className="mt-2 text-slate-400 max-w-xl">Manage your fee structure, view payment history, and download receipts all in one place.</p>
-                    </div>
+    if (!student) {
+        return (
+            <div className="min-h-screen bg-black text-white">
+                <Navbar />
+                <div className="max-w-3xl mx-auto py-20 px-6 text-center">
+                    <ExclamationCircleIcon className="w-16 h-16 text-yellow-500 mx-auto mb-6" />
+                    <h1 className="text-3xl font-bold mb-4">No Student Profile Linked</h1>
+                    <p className="text-white/60 mb-8">
+                        Your account is not linked to any student record at{' '}
+                        <strong>{SCHOOL_CONFIG.name}</strong>. Please contact the
+                        administration office to link your account using your email:{' '}
+                        <strong>{user?.email}</strong>
+                    </p>
+                    <p className="text-white/40 text-sm mb-8">
+                        Contact: {SCHOOL_CONFIG.email} &bull; {SCHOOL_CONFIG.phone}
+                    </p>
                     <button
-                        onClick={() => router.push('/payment')}
-                        className="group relative inline-flex items-center justify-center overflow-hidden rounded-full p-0.5 font-bold focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-900"
+                        onClick={() => router.push('/login')}
+                        className="bg-white text-black border border-yellow-500/30 px-8 py-3 rounded-xl font-bold"
                     >
-                        <span className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-cyan-500 to-emerald-500 opacity-100 transition-opacity group-hover:opacity-80 animate-gradient-x"></span>
-                        <span className="relative flex items-center gap-2 rounded-full bg-slate-900 px-8 py-3 transition-all duration-200 group-hover:bg-opacity-90 group-hover:text-white text-white">
-                            <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent group-hover:text-white transition-colors">Pay Now</span>
-                            <svg className="h-5 w-5 text-cyan-400 group-hover:text-white transition-colors group-hover:translate-x-1 duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                            </svg>
-                        </span>
+                        Back to Login
                     </button>
                 </div>
+            </div>
+        );
+    }
 
-                {}
-                {!student ? (
-                    <div className="rounded-2xl bg-amber-500/10 border border-amber-500/20 p-6 mb-8 text-amber-200 flex items-center gap-3">
-                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                        Profile Not Linked. Please contact admin.
+    const totalPaid = payments
+        .filter(p => p.paymentStatus === 'success')
+        .reduce((sum, p) => sum + p.amount, 0);
+
+    const balanceDue = feeDetails ? feeDetails.totalFee - totalPaid : 0;
+
+    return (
+        <div className="min-h-screen bg-black text-white">
+            <Navbar />
+
+            <main className="max-w-7xl mx-auto p-4 md:p-8 lg:p-12">
+                {/* Welcome Header */}
+                <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+                    <div>
+                        <h2 className="text-yellow-500 font-bold uppercase tracking-[0.2em] text-sm mb-2">Student Portal</h2>
+                        <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight">
+                            Hi, {student.name.split(' ')[0]} 👋
+                        </h1>
+                        <p className="mt-4 text-white/60 max-w-lg leading-relaxed text-lg">
+                            Manage your academic expenses and handle secure payments for <span className="text-white font-bold">{student.class}</span>.
+                        </p>
                     </div>
-                ) : (
-                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 mb-12">
-                        {}
-                        <div className="glass-card rounded-3xl p-8 relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300">
-                            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-                                <svg className="h-24 w-24 text-white transform rotate-12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.5l-2.5 1.25L12 11zm0 2.5l-5-2.5-5 2.5L12 22l10-8.5-5-2.5-5 2.5z" /></svg>
-                            </div>
-                            <div className="flex justify-between items-start mb-6">
-                                <div className="rounded-2xl bg-slate-800/50 p-3 ring-1 ring-white/10">
-                                    <svg className="h-6 w-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                                </div>
-                            </div>
-                            <dt className="truncate text-sm font-medium text-slate-400">Total Annual Fee</dt>
-                            <dd className="mt-2 text-4xl font-bold text-white tracking-tight">₹{feeDetails?.totalFee.toLocaleString() ?? 0}</dd>
+
+                    <div className="flex items-center gap-4 bg-white/5 p-4 rounded-3xl border border-yellow-500/20 backdrop-blur-sm self-start md:self-auto">
+                        <div className="w-12 h-12 rounded-2xl bg-white border border-yellow-500/30 flex items-center justify-center shadow-lg">
+                            <CreditCardIcon className="w-6 h-6 text-black" />
                         </div>
-
-                        {}
-                        <div className="glass-card rounded-3xl p-8 relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300">
-                            <div className="absolute -right-6 -top-6 h-32 w-32 bg-emerald-500/20 rounded-full blur-3xl group-hover:bg-emerald-500/30 transition-colors"></div>
-                            <div className="flex justify-between items-start mb-6 relative z-10">
-                                <div className="rounded-2xl bg-emerald-500/20 p-3 ring-1 ring-emerald-500/30">
-                                    <svg className="h-6 w-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                                </div>
-                                <div className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-400 border border-emerald-500/20">
-                                    {(feeDetails?.totalFee && feeDetails.totalFee > 0) ? Math.round((totalPaid / feeDetails.totalFee) * 100) : 0}% Paid
-                                </div>
-                            </div>
-                            <dt className="truncate text-sm font-medium text-slate-400 relative z-10">Total Paid</dt>
-                            <dd className="mt-2 text-4xl font-bold text-white tracking-tight relative z-10">₹{totalPaid.toLocaleString()}</dd>
-
-                            {}
-                            <div className="mt-6 h-2 w-full bg-slate-700/50 rounded-full overflow-hidden relative z-10">
-                                <div className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.5)]" style={{ width: `${Math.min((totalPaid / (feeDetails?.totalFee || 1)) * 100, 100)}%` }}></div>
-                            </div>
-                        </div>
-
-                        {}
-                        <div className="glass-card rounded-3xl p-8 relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300">
-                            <div className="absolute -right-6 -top-6 h-32 w-32 bg-amber-500/20 rounded-full blur-3xl group-hover:bg-amber-500/30 transition-colors"></div>
-                            <div className="flex justify-between items-start mb-6 relative z-10">
-                                <div className="rounded-2xl bg-amber-500/20 p-3 ring-1 ring-amber-500/30">
-                                    <svg className="h-6 w-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                </div>
-                            </div>
-                            <dt className="truncate text-sm font-medium text-slate-400 relative z-10">Pending Amount</dt>
-                            <dd className="mt-2 text-4xl font-bold text-white tracking-tight relative z-10">₹{totalDue.toLocaleString()}</dd>
-                            {totalDue > 0 && <p className="mt-2 text-xs text-amber-400 font-medium flex items-center gap-1">
-                                <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse"></span>
-                                Due Immediately
-                            </p>}
-                        </div>
-                    </div>
-                )}
-
-                {}
-                <div className="glass-card rounded-3xl overflow-hidden">
-                    <div className="px-8 py-6 border-b border-white/5 flex justify-between items-center bg-white/5 backdrop-blur-md">
                         <div>
-                            <h3 className="text-xl font-bold text-white">Recent Transactions</h3>
-                            <p className="text-slate-400 text-sm mt-1">History of your recent fee payments</p>
+                            <p className="text-xs text-white/40 uppercase font-black tracking-widest">Student ID</p>
+                            <p className="text-white font-mono font-bold">{student.studentId}</p>
                         </div>
-                        <button className="text-emerald-400 hover:text-emerald-300 text-sm font-semibold flex items-center gap-1 transition-colors px-3 py-1.5 rounded-lg hover:bg-emerald-500/10">
-                            View All <span aria-hidden="true">&rarr;</span>
-                        </button>
                     </div>
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full whitespace-nowrap text-left text-sm">
-                            <thead className="bg-slate-900/50 text-slate-400 uppercase tracking-wider text-xs">
-                                <tr>
-                                    <th scope="col" className="px-8 py-4 font-semibold">Payment ID</th>
-                                    <th scope="col" className="px-8 py-4 font-semibold">Description</th>
-                                    <th scope="col" className="px-8 py-4 font-semibold">Date</th>
-                                    <th scope="col" className="px-8 py-4 font-semibold">Method</th>
-                                    <th scope="col" className="px-8 py-4 font-semibold">Amount</th>
-                                    <th scope="col" className="px-8 py-4 font-semibold">Status</th>
-                                    <th scope="col" className="px-8 py-4 font-semibold text-right">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-white/5">
-                                {payments.length === 0 ? (
+                </div>
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                    <div className="glass-card rounded-[2rem] p-8 border border-yellow-500/20 relative overflow-hidden group">
+                        <p className="text-white/40 font-bold text-sm uppercase tracking-widest mb-2">Total Fees</p>
+                        <h3 className="text-4xl font-black text-white">₹{feeDetails?.totalFee.toLocaleString()}</h3>
+                        <div className="mt-4 inline-flex items-center text-xs text-white/60 bg-white/5 border border-yellow-500/10 rounded-full px-3 py-1">
+                            Annual Schedule
+                        </div>
+                        <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-yellow-500/5 blur-3xl rounded-full"></div>
+                    </div>
+
+                    <div className="glass-card rounded-[2rem] p-8 border border-yellow-500/20 relative overflow-hidden group">
+                        <p className="text-yellow-500 font-bold text-sm uppercase tracking-widest mb-2">Paid Amount</p>
+                        <h3 className="text-4xl font-black text-white">₹{totalPaid.toLocaleString()}</h3>
+                        <div className="mt-4 inline-flex items-center gap-1.5 text-xs text-yellow-500 bg-yellow-500/10 rounded-full px-3 py-1 font-bold">
+                            <CheckCircleIcon className="w-3.5 h-3.5" />
+                            Confirmed Transactions
+                        </div>
+                    </div>
+
+                    <div className="glass-card rounded-[2rem] p-8 border border-yellow-500/20 relative overflow-hidden group bg-gradient-to-br from-white/5 to-transparent">
+                        <p className="text-orange-400 font-bold text-sm uppercase tracking-widest mb-2">Balance Due</p>
+                        <h3 className="text-4xl font-black text-white">₹{balanceDue.toLocaleString()}</h3>
+                        {balanceDue > 0 ? (
+                            <button
+                                onClick={() => router.push('/payment')}
+                                className="mt-4 inline-flex items-center gap-2 text-xs text-black bg-white hover:bg-gray-100 border border-yellow-500/30 rounded-full px-4 py-2 font-black transition-all hover:scale-105 shadow-lg"
+                            >
+                                Pay Outstanding
+                                <ArrowUpRightIcon className="w-3 h-3" />
+                            </button>
+                        ) : (
+                            <div className="mt-4 inline-flex items-center gap-1.5 text-xs text-yellow-500 bg-yellow-500/10 rounded-full px-3 py-1 font-bold border border-yellow-500/20">
+                                <CheckCircleIcon className="w-3.5 h-3.5" /> All Settled
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* History Section */}
+                <div>
+                    <div className="flex items-center justify-between mb-8">
+                        <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                            <ClockIcon className="w-6 h-6 text-yellow-500" />
+                            Payment History
+                        </h2>
+                    </div>
+
+                    <div className="glass-card rounded-[2.5rem] overflow-hidden border border-yellow-500/20">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left">
+                                <thead className="bg-white/5 border-b border-yellow-500/10 font-bold uppercase tracking-widest text-[10px] text-white/40">
                                     <tr>
-                                        <td colSpan={7} className="px-8 py-12 text-center text-slate-500">
-                                            No transactions found yet.
-                                        </td>
+                                        <th className="px-8 py-5">Date</th>
+                                        <th className="px-8 py-5">Transaction ID</th>
+                                        <th className="px-8 py-5">Amount</th>
+                                        <th className="px-8 py-5">Status</th>
+                                        <th className="px-8 py-5">Action</th>
                                     </tr>
-                                ) : (
-                                    payments.slice(0, 5).map((payment) => (
-                                        <tr key={payment.paymentId} className="hover:bg-white/5 transition-colors group">
-                                            <td className="px-8 py-4 text-slate-400 font-mono text-xs">#{payment.stripeSessionId.slice(-8).toUpperCase()}</td>
-                                            <td className="px-8 py-4 text-slate-200 font-medium group-hover:text-white transition-colors">Tuition Fee Payment</td>
-                                            <td className="px-8 py-4 text-slate-400">{new Date(payment.createdAt).toLocaleDateString()}</td>
-                                            <td className="px-8 py-4 text-slate-300 flex items-center gap-2">
-                                                <svg className="h-4 w-4 text-slate-500" fill="currentColor" viewBox="0 0 24 24"><path d="M2 10h20v7a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3v-7zm0-2V6a3 3 0 0 1 3-3h14a3 3 0 0 1 3 3v2H2z" /></svg>
-                                                Card
-                                            </td>
-                                            <td className="px-8 py-4 text-white font-bold">₹{payment.amount.toLocaleString()}</td>
-                                            <td className="px-8 py-4">
-                                                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold border ${getStatusStyle(payment.status)}`}>
-                                                    <span className={`h-1.5 w-1.5 mr-1.5 rounded-full ${payment.status === 'paid' ? 'bg-current' : 'bg-current'}`}></span>
-                                                    {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
-                                                </span>
-                                            </td>
-                                            <td className="px-8 py-4 text-right">
-                                                {receiptMap[payment.stripeSessionId] ? (
-                                                    <a
-                                                        href={`/receipt/${receiptMap[payment.stripeSessionId]}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all hover:scale-105 active:scale-95 shadow-[0_0_10px_rgba(16,185,129,0.1)]"
-                                                    >
-                                                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                        </svg>
-                                                        Receipt
-                                                    </a>
-                                                ) : (
-                                                    <span className="text-slate-600 text-xs italic">Processing...</span>
-                                                )}
+                                </thead>
+                                <tbody className="divide-y divide-yellow-500/5 text-sm">
+                                    {payments.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={5} className="px-8 py-20 text-center text-white/40">
+                                                No transactions recorded yet.
                                             </td>
                                         </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                    {payments.length > 5 && (
-                        <div className="border-t border-white/5 px-8 py-4 flex items-center justify-between text-xs text-slate-500 bg-white/5">
-                            <span>Showing {Math.min(payments.length, 5)} of {payments.length} transactions</span>
-                            <div className="flex gap-2">
-                                <button className="h-8 w-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition-all disabled:opacity-50">&lt;</button>
-                                <button className="h-8 w-8 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold shadow-lg shadow-emerald-500/20">1</button>
-                                <button className="h-8 w-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition-all disabled:opacity-50">&gt;</button>
-                            </div>
+                                    ) : (
+                                        payments.map((p, idx) => (
+                                            <tr key={idx} className="group hover:bg-white/5 transition-colors">
+                                                <td className="px-8 py-6 text-white/60 font-medium">
+                                                    {new Date(p.createdAt).toLocaleDateString()}
+                                                </td>
+                                                <td className="px-8 py-6 text-white/40 font-mono text-xs">
+                                                    {p.stripeSessionId.substring(0, 16)}...
+                                                </td>
+                                                <td className="px-8 py-6 text-white font-black">
+                                                    ₹{p.amount.toLocaleString()}
+                                                </td>
+                                                <td className="px-8 py-6">
+                                                    <span className={`inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-black uppercase leading-none border ${p.paymentStatus === 'success'
+                                                        ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+                                                        : p.paymentStatus === 'pending'
+                                                            ? 'bg-white/5 text-white/40 border-white/10'
+                                                            : p.paymentStatus === 'failed'
+                                                                ? 'bg-red-500/10 text-red-500 border-red-500/20'
+                                                                : 'bg-white/5 text-white/20 border-white/5 italic'
+                                                        }`}>
+                                                        {p.paymentStatus}
+                                                    </span>
+                                                </td>
+                                                <td className="px-8 py-6">
+                                                    {p.paymentStatus === 'success' && (
+                                                        <button
+                                                            onClick={async () => {
+                                                                try {
+                                                                    const q = query(collection(db, 'receipts'), where('transactionId', '==', p.stripeSessionId));
+                                                                    const snap = await getDocs(q);
+                                                                    if (!snap.empty) {
+                                                                        router.push(`/receipt/${snap.docs[0].id}`);
+                                                                    } else {
+                                                                        alert('Receipt still generating. Please refresh in a moment.');
+                                                                    }
+                                                                } catch (e) {
+                                                                    console.error(e);
+                                                                }
+                                                            }}
+                                                            className="text-yellow-500 hover:text-white font-black uppercase text-xs tracking-widest transition-colors"
+                                                        >
+                                                            View Receipt
+                                                        </button>
+                                                    )}
+                                                    {p.paymentStatus === 'failed' && (
+                                                        <Link href="/payment" className="text-white/40 hover:text-white text-xs font-bold transition-colors uppercase">
+                                                            Retry
+                                                        </Link>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
-                    )}
+                    </div>
                 </div>
             </main>
         </div>

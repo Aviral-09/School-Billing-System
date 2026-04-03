@@ -23,8 +23,9 @@ export default function SeedPage() {
             });
 
             setStatus('Success! You are now an Admin. Go to /login');
-        } catch (error: any) {
-            setStatus('Error: ' + error.message);
+        } catch (error: unknown) {
+            const err = error as Error;
+            setStatus('Error: ' + err.message);
         }
     };
 
@@ -34,7 +35,7 @@ export default function SeedPage() {
             const result = await signInWithPopup(auth, provider);
             const user = result.user;
 
-            
+
             await setDoc(doc(db, 'users', user.uid), {
                 uid: user.uid,
                 name: user.displayName,
@@ -43,16 +44,16 @@ export default function SeedPage() {
                 createdAt: Date.now()
             });
 
-            
+
             await setDoc(doc(db, 'students', 'ST-' + user.uid.slice(0, 5)), {
                 studentId: 'ST-' + user.uid.slice(0, 5),
                 name: user.displayName,
                 class: 'Class 10',
-                parentEmail: user.email, 
+                parentEmail: user.email,
                 userId: user.uid
             });
 
-            
+
             await setDoc(doc(db, 'fees', 'fees-' + user.uid), {
                 className: 'Class 10',
                 tuitionFee: 5000,
@@ -62,8 +63,9 @@ export default function SeedPage() {
             });
 
             setStatus('Success! Created Student + Fee Record. Go to /login');
-        } catch (error: any) {
-            setStatus('Error: ' + error.message);
+        } catch (error: unknown) {
+            const err = error as Error;
+            setStatus('Error: ' + err.message);
         }
     };
 

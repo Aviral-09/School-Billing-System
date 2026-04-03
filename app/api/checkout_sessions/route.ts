@@ -1,13 +1,15 @@
 import Stripe from 'stripe';
 import { NextRequest, NextResponse } from 'next/server';
+import { db } from '@/lib/firebase';
+import { collection, addDoc } from 'firebase/firestore';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: '2024-06-20' as any,
+    // apiVersion: '2024-06-20',
 });
 
 export async function POST(req: NextRequest) {
     try {
-        const { amount, studentId, feeType } = await req.json();
+        const { amount, studentId, userId, feeType } = await req.json();
 
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
@@ -19,7 +21,7 @@ export async function POST(req: NextRequest) {
                             name: `School Fee: ${feeType}`,
                             description: `Student ID: ${studentId}`,
                         },
-                        unit_amount: amount * 100, 
+                        unit_amount: amount * 100,
                     },
                     quantity: 1,
                 },
@@ -29,13 +31,28 @@ export async function POST(req: NextRequest) {
             return_url: `${req.headers.get('origin')}/payment/return?session_id={CHECKOUT_SESSION_ID}&studentId=${studentId}&amount=${amount}`,
             metadata: {
                 studentId,
+                userId,
                 feeType,
             },
         });
 
+        // Create a pending payment record in Firestore
+        // This allows us to track the payment even if the user closes the window
+        await addDoc(collection(db, 'payments'), {
+            paymentId: 'PAY-' + Date.now(),
+            studentId: studentId,
+            userId: userId || '',
+            amount: Number(amount),
+            paymentStatus: 'pending',
+            stripeSessionId: session.id,
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+        });
+
         return NextResponse.json({ clientSecret: session.client_secret });
-    } catch (err: any) {
-        console.error('Stripe Error:', err);
-        return NextResponse.json({ error: err.message }, { status: 500 });
+    } catch (err: unknown) {
+        const error = err as Error;
+        console.error('Stripe Error:', error);
+        return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

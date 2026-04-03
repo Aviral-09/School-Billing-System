@@ -1,77 +1,140 @@
+'use client';
+
 import Link from 'next/link';
+import { SCHOOL_CONFIG } from '@/lib/schoolConfig';
+import {
+    AcademicCapIcon,
+    CurrencyDollarIcon,
+    UserGroupIcon,
+    ChartBarIcon,
+    ShieldCheckIcon,
+    ArrowRightIcon
+} from '@heroicons/react/24/outline';
 
-export default function Home() {
-  return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-8 overflow-hidden relative selection:bg-emerald-500/30">
-      {}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[10%] left-[20%] w-[500px] h-[500px] bg-emerald-500/10 blur-[120px] rounded-full mix-blend-screen animate-blob"></div>
-        <div className="absolute bottom-[10%] right-[20%] w-[500px] h-[500px] bg-cyan-500/10 blur-[120px] rounded-full mix-blend-screen animate-blob animation-delay-2000"></div>
-        <div className="absolute top-[40%] left-[60%] w-[300px] h-[300px] bg-indigo-500/10 blur-[100px] rounded-full mix-blend-screen animate-blob animation-delay-4000"></div>
-      </div>
+const features = [
+    {
+        icon: CurrencyDollarIcon,
+        title: 'Fee Management',
+        description: 'Track tuition, transport, and exam fees for all students with a unified dashboard.',
+    },
+    {
+        icon: UserGroupIcon,
+        title: 'Student Portals',
+        description: 'Dedicated access for students to view balances, make payments, and download receipts.',
+    },
+    {
+        icon: ChartBarIcon,
+        title: 'Admin Analytics',
+        description: 'Real-time revenue tracking, pending due reports, and class-wise fee summaries.',
+    },
+    {
+        icon: ShieldCheckIcon,
+        title: 'Secure Payments',
+        description: 'End-to-end encrypted payments via Stripe with automatic digital receipt generation.',
+    },
+];
 
-      <div className="relative z-10 flex flex-col items-center w-full max-w-7xl mx-auto">
-        <div className="mb-8 flex items-center justify-center gap-4 animate-fadeIn">
-          <div className="glass p-3 rounded-2xl shadow-[0_0_30px_rgba(16,185,129,0.3)]">
-            <svg className="h-10 w-10 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-            </svg>
-          </div>
-          <span className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 tracking-tight">EduBill</span>
+export default function HomePage() {
+    return (
+        <div className="min-h-screen bg-black text-white selection:bg-yellow-500/30">
+
+            {/* Top Bar */}
+            <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-yellow-500/20">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="bg-white p-2 rounded-xl border border-yellow-500/30">
+                            <AcademicCapIcon className="w-6 h-6 text-black" />
+                        </div>
+                        <span className="text-xl font-bold text-white tracking-tight">
+                            {SCHOOL_CONFIG.shortName} <span className="text-yellow-500">Portal</span>
+                        </span>
+                    </div>
+                    <Link
+                        href="/login"
+                        className="inline-flex items-center gap-2 bg-white hover:bg-gray-200 text-black px-6 py-2.5 rounded-xl font-bold text-sm shadow-lg border border-yellow-500/30 transition-all active:scale-95"
+                    >
+                        Staff / Student Login
+                        <ArrowRightIcon className="w-4 h-4" />
+                    </Link>
+                </div>
+            </header>
+
+            {/* Hero */}
+            <section className="relative pt-24 pb-28 overflow-hidden">
+                <div className="absolute top-20 left-1/4 w-72 h-72 bg-yellow-500/8 blur-[120px] rounded-full pointer-events-none" />
+                <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-white/5 blur-[120px] rounded-full pointer-events-none" />
+
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 text-xs font-black uppercase tracking-widest mb-8">
+                        Academic Year {SCHOOL_CONFIG.academicYear}
+                    </div>
+
+                    <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter mb-6 leading-tight">
+                        {SCHOOL_CONFIG.name}
+                    </h1>
+                    <p className="text-lg md:text-xl text-slate-400 mb-4 leading-relaxed max-w-2xl mx-auto">
+                        {SCHOOL_CONFIG.tagline}
+                    </p>
+                    <p className="text-sm text-slate-500 mb-12">
+                        Internal Billing & Fee Management System
+                    </p>
+
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <Link
+                            href="/login"
+                            className="w-full sm:w-auto px-10 py-5 bg-white hover:bg-gray-100 text-black font-black text-lg rounded-2xl shadow-2xl border border-yellow-500/30 transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-3"
+                        >
+                            Login to Portal
+                            <ArrowRightIcon className="w-5 h-5" />
+                        </Link>
+                        <Link
+                            href="/student/dashboard"
+                            className="w-full sm:w-auto px-10 py-5 bg-transparent text-white font-bold text-lg rounded-2xl border border-yellow-500/20 hover:border-yellow-500/60 transition-all"
+                        >
+                            Student Dashboard
+                        </Link>
+                    </div>
+                </div>
+            </section>
+
+            {/* Features */}
+            <section className="py-20 border-t border-yellow-500/10">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-16">
+                        <h2 className="text-yellow-500 font-bold uppercase tracking-widest text-xs mb-3">System Capabilities</h2>
+                        <h3 className="text-4xl font-black text-white">Everything in one place</h3>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {features.map((f) => (
+                            <div
+                                key={f.title}
+                                className="glass-card p-8 rounded-[2rem] border border-yellow-500/20 hover:border-yellow-500/60 transition-all group"
+                            >
+                                <div className="bg-white/10 w-12 h-12 rounded-xl flex items-center justify-center mb-5 border border-yellow-500/20 group-hover:scale-110 transition-transform">
+                                    <f.icon className="w-6 h-6 text-yellow-400" />
+                                </div>
+                                <h4 className="text-lg font-bold text-white mb-2">{f.title}</h4>
+                                <p className="text-slate-400 text-sm leading-relaxed">{f.description}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Footer */}
+            <footer className="py-10 border-t border-yellow-500/10">
+                <div className="max-w-7xl mx-auto px-4 text-center space-y-2">
+                    <div className="flex items-center justify-center gap-3 mb-4">
+                        <AcademicCapIcon className="w-5 h-5 text-yellow-500" />
+                        <span className="font-bold text-white">{SCHOOL_CONFIG.name}</span>
+                    </div>
+                    <p className="text-slate-500 text-xs">{SCHOOL_CONFIG.address}</p>
+                    <p className="text-slate-500 text-xs">{SCHOOL_CONFIG.email} &bull; {SCHOOL_CONFIG.phone}</p>
+                    <p className="text-slate-600 text-xs mt-4">
+                        © {new Date().getFullYear()} {SCHOOL_CONFIG.name}. Internal use only. All rights reserved.
+                    </p>
+                </div>
+            </footer>
         </div>
-
-        <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 text-center tracking-tight max-w-4xl leading-tight animate-slideUp">
-          School Billing <br className="hidden md:block" /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">Reimagined</span>
-        </h1>
-        <p className="text-lg md:text-xl text-slate-400 mb-16 text-center max-w-2xl leading-relaxed animate-slideUp animation-delay-200">
-          Streamline fee management, track payments, and access records with our premium digital portal. Experience the future of school finance.
-        </p>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl px-4 md:px-0 animate-slideUp animation-delay-300">
-          {}
-          <div className="glass-card p-10 rounded-[2.5rem] flex flex-col items-center group cursor-pointer hover:bg-white/10 transition-all duration-300 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
-            <div className="h-24 w-24 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-full flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300 ring-1 ring-emerald-500/30 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
-              <svg className="w-10 h-10 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 14l9-5-9-5-9 5 9 5z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-              </svg>
-            </div>
-            <h2 className="text-3xl font-bold text-white mb-4 relative z-10">Student Portal</h2>
-            <p className="text-center text-slate-400 mb-10 leading-relaxed max-w-sm relative z-10">
-              Log in to view your academic fee structure, pay outstanding dues securely, and download payment receipts.
-            </p>
-            <Link
-              href="/login?role=student"
-              className="relative z-10 w-full rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-8 py-4 text-white font-bold text-lg text-center shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:scale-[1.02] transition-all"
-            >
-              Login as Student
-            </Link>
-          </div>
-
-          {}
-          <div className="glass-card p-10 rounded-[2.5rem] flex flex-col items-center group cursor-pointer hover:bg-white/10 transition-all duration-300 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
-            <div className="h-24 w-24 bg-gradient-to-br from-indigo-500/20 to-blue-500/20 rounded-full flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300 ring-1 ring-indigo-500/30 shadow-[0_0_30px_rgba(99,102,241,0.1)]">
-              <svg className="w-10 h-10 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <h2 className="text-3xl font-bold text-white mb-4 relative z-10">Administration</h2>
-            <p className="text-center text-slate-400 mb-10 leading-relaxed max-w-sm relative z-10">
-              Access the control panel to manage student enrollments, monitor financial records, and track revenue.
-            </p>
-            <Link
-              href="/login?role=admin"
-              className="relative z-10 w-full rounded-2xl bg-white/5 border border-white/10 px-8 py-4 text-white font-bold text-lg text-center hover:bg-white/10 hover:border-indigo-400/50 hover:text-indigo-400 transition-all backdrop-blur-md"
-            >
-              Login as Admin
-            </Link>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+    );
 }

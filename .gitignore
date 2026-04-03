@@ -39,3 +39,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# npm auth (never commit tokens)
+.npmrc
+
+# lint/debug output
+lint_results.txt
+lint_output.txt
+fresh_lint_errors.txt
+install_final.log
+*.log

@@ -1,8 +1,8 @@
 import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
 import { getAuth, Auth } from "firebase/auth";
-import { getFirestore, Firestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
+import { getFirestore, Firestore, initializeFirestore } from "firebase/firestore";
 
-const firebaseConfig = {
+export const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
     projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
@@ -20,11 +20,11 @@ const auth: Auth = getAuth(app);
 
 let db: Firestore;
 try {
-    
+
     db = initializeFirestore(app, { experimentalForceLongPolling: true });
     console.log("Firebase: Initialized with long polling");
-} catch (e) {
-    
+} catch {
+
     db = getFirestore(app);
     console.log("Firebase: Fallback to default Firestore initialization");
 }

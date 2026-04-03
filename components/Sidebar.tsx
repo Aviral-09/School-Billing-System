@@ -1,196 +1,142 @@
 'use client';
 
-import { Fragment, useState } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
-import {
-    HomeIcon,
-    UsersIcon,
-    BanknotesIcon,
-    XMarkIcon,
-    ArrowRightOnRectangleIcon
-} from '@heroicons/react/24/outline';
+import { useState, ReactNode } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { auth } from '@/lib/firebase';
-import { useRouter, usePathname } from 'next/navigation';
+import { SCHOOL_CONFIG } from '@/lib/schoolConfig';
+import {
+    Squares2X2Icon as LayoutDashboardIcon,
+    UsersIcon,
+    CreditCardIcon,
+    ArrowLeftOnRectangleIcon as LogOutIcon,
+    Bars3Icon as MenuIcon,
+    XMarkIcon as XIcon,
+    AcademicCapIcon
+} from '@heroicons/react/24/outline';
 
-const navigation = [
-    { name: 'Dashboard', href: '/admin/dashboard', icon: HomeIcon },
-    { name: 'Students', href: '/admin/students', icon: UsersIcon, current: false },
-    { name: 'Payments', href: '/admin/payments', icon: BanknotesIcon, current: false },
-];
-
-function classNames(...classes: string[]) {
-    return classes.filter(Boolean).join(' ');
+interface SidebarProps {
+    children: ReactNode;
 }
 
-export default function Sidebar({ children }: { children: React.ReactNode }) {
-    const [sidebarOpen, setSidebarOpen] = useState(false);
-    const { role } = useAuth();
-    const router = useRouter();
+export default function Sidebar({ children }: SidebarProps) {
+    const [isOpen, setIsOpen] = useState(false);
     const pathname = usePathname();
+    const { user, role } = useAuth();
 
-    const handleLogout = async () => {
-        await auth.signOut();
-        router.push('/login');
-    };
+    const navigation = [
+        { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboardIcon },
+        { name: 'Students', href: '/admin/students', icon: UsersIcon },
+        { name: 'Payments', href: '/admin/payments', icon: CreditCardIcon },
+    ];
+
+    const toggleSidebar = () => setIsOpen(!isOpen);
 
     return (
-        <>
-            <div className="min-h-screen">
-                <Transition.Root show={sidebarOpen} as={Fragment}>
-                    <Dialog as="div" className="relative z-50 lg:hidden" onClose={setSidebarOpen}>
-                        <Transition.Child
-                            as={Fragment}
-                            enter="transition-opacity ease-linear duration-300"
-                            enterFrom="opacity-0"
-                            enterTo="opacity-100"
-                            leave="transition-opacity ease-linear duration-300"
-                            leaveFrom="opacity-100"
-                            leaveTo="opacity-0"
-                        >
-                            <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm" />
-                        </Transition.Child>
+        <div className="min-h-screen bg-black">
+            {/* Mobile Overlay */}
+            {isOpen && (
+                <div
+                    className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+                    onClick={toggleSidebar}
+                />
+            )}
 
-                        <div className="fixed inset-0 flex">
-                            <Transition.Child
-                                as={Fragment}
-                                enter="transition ease-in-out duration-300 transform"
-                                enterFrom="-translate-x-full"
-                                enterTo="translate-x-0"
-                                leave="transition ease-in-out duration-300 transform"
-                                leaveFrom="translate-x-0"
-                                leaveTo="-translate-x-full"
-                            >
-                                <Dialog.Panel className="relative mr-16 flex w-full max-w-xs flex-1">
-                                    <div className="flex grow flex-col gap-y-5 overflow-y-auto glass px-6 pb-4">
-                                        <div className="flex h-16 shrink-0 items-center gap-2 mt-4">
-                                            <div className="bg-gradient-to-br from-emerald-400 to-cyan-500 rounded-lg p-1.5 shadow-lg shadow-emerald-500/20">
-                                                <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                                                </svg>
-                                            </div>
-                                            <span className="text-xl font-bold text-white tracking-wide">SchoolBilling</span>
-                                        </div>
-                                        <nav className="flex flex-1 flex-col">
-                                            <ul role="list" className="flex flex-1 flex-col gap-y-7">
-                                                <li>
-                                                    <ul role="list" className="-mx-2 space-y-2">
-                                                        {navigation.map((item) => (
-                                                            <li key={item.name}>
-                                                                <Link
-                                                                    href={item.href}
-                                                                    className={classNames(
-                                                                        pathname === item.href
-                                                                            ? 'bg-white/10 text-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.1)]'
-                                                                            : 'text-slate-400 hover:text-white hover:bg-white/5',
-                                                                        'group flex gap-x-3 rounded-xl p-3 text-sm leading-6 font-semibold transition-all duration-200'
-                                                                    )}
-                                                                >
-                                                                    <item.icon className={classNames(
-                                                                        pathname === item.href ? 'text-emerald-400' : 'text-slate-500 group-hover:text-white',
-                                                                        'h-6 w-6 shrink-0'
-                                                                    )} aria-hidden="true" />
-                                                                    {item.name}
-                                                                </Link>
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </li>
-                                                <li className="mt-auto">
-                                                    <button
-                                                        onClick={handleLogout}
-                                                        className="group -mx-2 flex gap-x-3 rounded-xl p-3 text-sm font-semibold leading-6 text-slate-400 hover:bg-white/5 hover:text-white w-full transition-colors"
-                                                    >
-                                                        <ArrowRightOnRectangleIcon className="h-6 w-6 shrink-0" aria-hidden="true" />
-                                                        Logout
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </nav>
-                                    </div>
-                                </Dialog.Panel>
-                            </Transition.Child>
-                        </div>
-                    </Dialog>
-                </Transition.Root>
-
-                {}
-                <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
-                    <div className="flex grow flex-col gap-y-5 overflow-y-auto glass m-4 rounded-3xl px-6 pb-4">
-                        <div className="flex h-24 shrink-0 items-center gap-3">
-                            <div className="bg-gradient-to-br from-emerald-400 to-cyan-500 rounded-xl p-2 shadow-lg shadow-emerald-500/30">
-                                <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                                </svg>
+            {/* Sidebar */}
+            <aside className={`
+                fixed top-0 left-0 z-50 h-full w-72 bg-black border-r border-yellow-500/20 
+                transition-transform duration-300 ease-in-out lg:translate-x-0
+                ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+            `}>
+                <div className="flex flex-col h-full">
+                    {/* Logo */}
+                    <div className="p-8">
+                        <div className="flex items-center gap-3">
+                            <div className="bg-white p-2 rounded-xl shadow-lg border border-yellow-500/30">
+                                <AcademicCapIcon className="w-6 h-6 text-black" />
                             </div>
                             <div>
-                                <h1 className="text-lg font-bold text-white tracking-wide">SchoolBilling</h1>
-                                <p className="text-xs text-slate-400">Admin Panel</p>
+                                <p className="text-base font-bold text-white leading-tight">
+                                    {SCHOOL_CONFIG.shortName}
+                                </p>
+                                <p className="text-[10px] text-yellow-500 font-bold uppercase tracking-widest">
+                                    Admin Panel
+                                </p>
                             </div>
                         </div>
-                        <nav className="flex flex-1 flex-col">
-                            <ul role="list" className="flex flex-1 flex-col gap-y-7">
-                                <li>
-                                    <ul role="list" className="-mx-2 space-y-2">
-                                        {navigation.map((item) => (
-                                            <li key={item.name}>
-                                                <Link
-                                                    href={item.href}
-                                                    className={classNames(
-                                                        pathname === item.href
-                                                            ? 'bg-white/10 text-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.15)] border border-white/5'
-                                                            : 'text-slate-400 hover:text-white hover:bg-white/5',
-                                                        'group flex gap-x-3 rounded-2xl p-3 text-sm leading-6 font-semibold transition-all duration-300 items-center'
-                                                    )}
-                                                >
-                                                    <item.icon className={classNames(
-                                                        pathname === item.href ? 'text-emerald-400' : 'text-slate-500 group-hover:text-white',
-                                                        'h-5 w-5 shrink-0 transition-colors'
-                                                    )} aria-hidden="true" />
-                                                    {item.name}
-                                                </Link>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </li>
-                                <li className="mt-auto">
-                                    <div className="rounded-2xl bg-gradient-to-br from-slate-800/50 to-slate-900/50 p-5 mb-6 border border-white/5 relative overflow-hidden group">
-                                        <div className="absolute inset-0 bg-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                                        <div className="flex items-center gap-3 mb-3 relative z-10">
-                                            <div className="bg-emerald-500/20 p-2 rounded-full">
-                                                <svg className="h-5 w-5 text-emerald-400" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                                                </svg>
-                                            </div>
-                                            <div>
-                                                <span className="text-white font-semibold text-sm block">Need Help?</span>
-                                                <span className="text-slate-400 text-xs">Check our docs</span>
-                                            </div>
-                                        </div>
-                                    </div>
+                    </div>
 
-                                    <button
-                                        onClick={handleLogout}
-                                        className="group -mx-2 flex gap-x-3 rounded-2xl p-3 text-sm font-semibold leading-6 text-slate-400 hover:bg-white/10 hover:text-white w-full transition-all items-center border border-transparent hover:border-white/5"
-                                    >
-                                        <ArrowRightOnRectangleIcon className="h-5 w-5 shrink-0" aria-hidden="true" />
-                                        Logout
-                                    </button>
-                                </li>
-                            </ul>
-                        </nav>
+                    {/* Navigation */}
+                    <nav className="flex-1 px-4 space-y-2 mt-4">
+                        {navigation.map((item) => {
+                            const isActive = pathname === item.href;
+                            return (
+                                <Link
+                                    key={item.name}
+                                    href={item.href}
+                                    className={`
+                                        flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all group
+                                        ${isActive
+                                            ? 'bg-white/10 text-yellow-500 border border-yellow-500/20'
+                                            : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'}
+                                    `}
+                                >
+                                    <item.icon className={`w-5 h-5 ${isActive ? 'text-yellow-500' : 'text-gray-500 group-hover:text-yellow-400'}`} />
+                                    {item.name}
+                                    {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(250,204,21,1)]" />}
+                                </Link>
+                            );
+                        })}
+                    </nav>
+
+                    {/* User Profile + Logout */}
+                    <div className="p-4 border-t border-yellow-500/10">
+                        <div className="flex items-center gap-3 px-4 py-4 rounded-2xl bg-white/5 mb-4">
+                            <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center border border-yellow-500/20 text-black font-bold">
+                                {user?.displayName ? user.displayName.charAt(0) : 'A'}
+                            </div>
+                            <div className="overflow-hidden">
+                                <p className="text-sm font-bold text-white truncate">
+                                    {user?.displayName || 'Admin User'}
+                                </p>
+                                <p className="text-[10px] text-yellow-500 uppercase font-bold tracking-widest">
+                                    Administrator
+                                </p>
+                            </div>
+                        </div>
+                        <button
+                            className="w-full flex items-center gap-3 px-4 py-3 text-red-400 font-medium rounded-xl hover:bg-red-500/10 transition-colors"
+                            onClick={async () => {
+                                const { auth } = await import('@/lib/firebase');
+                                await auth.signOut();
+                                window.location.href = '/login';
+                            }}
+                        >
+                            <LogOutIcon className="w-5 h-5" />
+                            Logout
+                        </button>
                     </div>
                 </div>
+            </aside>
 
-                <div className="lg:pl-80 min-h-screen">
-                    <main className="py-8">
-                        <div className="px-4 sm:px-6 lg:px-8">
-                            {children}
-                        </div>
-                    </main>
-                </div>
+            {/* Main Content Wrapper */}
+            <div className="lg:pl-72 flex flex-col min-h-screen">
+                {/* Mobile Header */}
+                <header className="lg:hidden flex items-center justify-between p-4 bg-black border-b border-yellow-500/20">
+                    <div className="flex items-center gap-3">
+                        <AcademicCapIcon className="w-6 h-6 text-yellow-500" />
+                        <span className="text-lg font-bold text-white">{SCHOOL_CONFIG.shortName} Admin</span>
+                    </div>
+                    <button onClick={toggleSidebar} className="p-2 text-gray-400">
+                        {isOpen ? <XIcon /> : <MenuIcon />}
+                    </button>
+                </header>
+
+                {/* Page Content */}
+                <main className="flex-1 p-6 md:p-10">
+                    {children}
+                </main>
             </div>
-        </>
+        </div>
     );
 }

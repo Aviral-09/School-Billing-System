@@ -1,41 +1,15 @@
 
 import { db } from '@/lib/firebase';
-import { collection, addDoc, query, orderBy, limit, getDocs, doc, getDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, getDoc } from 'firebase/firestore';
 import { Receipt } from '@/types';
+import { SCHOOL_CONFIG } from '@/lib/schoolConfig';
 
 
-const generateReceiptNumber = async (): Promise<string> => {
+const generateReceiptNumber = (): string => {
     const year = new Date().getFullYear();
-    const prefix = `SBS-${year}`;
-
-    
-    
-    
-    try {
-        const q = query(
-            collection(db, 'receipts'),
-            orderBy('createdAt', 'desc'),
-            limit(1)
-        );
-        const snapshot = await getDocs(q);
-
-        if (!snapshot.empty) {
-            const lastReceipt = snapshot.docs[0].data() as Receipt;
-            const lastNumber = lastReceipt.receiptNumber;
-            
-            const parts = lastNumber.split('-');
-            if (parts.length === 3 && parts[1] === year.toString()) {
-                const sequence = parseInt(parts[2], 10);
-                if (!isNaN(sequence)) {
-                    return `${prefix}-${String(sequence + 1).padStart(4, '0')}`;
-                }
-            }
-        }
-    } catch (e) {
-        console.warn("Could not fetch last receipt number, starting fresh sequence.", e);
-    }
-
-    return `${prefix}-0001`;
+    const timestamp = Date.now().toString().slice(-6);
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    return `${SCHOOL_CONFIG.shortName}-${year}-${timestamp}-${random}`;
 };
 
 
@@ -49,9 +23,9 @@ export const createReceipt = async (
     },
     studentId: string,
     generatedBy: string = 'System'
-): Promise<string> => {
+): Promise<{ id: string, receipt: Receipt, student: any }> => {
     try {
-        
+
         const studentRef = doc(db, 'students', studentId);
         const studentSnap = await getDoc(studentRef);
 
@@ -60,19 +34,21 @@ export const createReceipt = async (
         }
 
         const studentData = studentSnap.data();
+        const userId = studentData.userId;
 
-        
-        const receiptNumber = await generateReceiptNumber();
+
+        const receiptNumber = generateReceiptNumber();
         const timestamp = Date.now();
 
-        
+
         const receipt: Receipt = {
             receiptId: `RCP-${timestamp}`,
             receiptNumber,
             studentId: studentId,
+            userId: userId,
             studentName: studentData.name || 'Unknown',
             class: studentData.class || 'Unknown',
-            feeType: 'Tuition/Annual Fee', 
+            feeType: 'Tuition/Annual Fee',
             amountPaid: paymentData.amount,
             paymentMode: paymentData.method,
             transactionId: paymentData.transactionId,
@@ -81,9 +57,9 @@ export const createReceipt = async (
             generatedBy: generatedBy
         };
 
-        
+
         const docRef = await addDoc(collection(db, 'receipts'), receipt);
-        return docRef.id;
+        return { id: docRef.id, receipt, student: studentData };
     } catch (error) {
         console.error("Error creating receipt:", error);
         throw error;
