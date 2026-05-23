@@ -16,14 +16,37 @@ export interface StudentProfile {
     section?: string;
     transportFee?: number;
     parentEmail?: string; // Kept for legacy compatibility
+    feeStructure?: FeeStructure;
+    totalPayable?: number;
+    session?: string;
 }
 
 export interface FeeStructure {
+    id?: string;
     className: string;
+    session: string;
+    admissionFee: number;
     tuitionFee: number;
-    transportFee: number;
     examFee: number;
+    libraryFee: number;
+    computerFee: number;
+    transportFee: number;
+    sportsFee: number;
+    miscFee: number;
     totalFee: number;
+    feeType: 'monthly' | 'quarterly' | 'yearly' | 'one-time';
+    enabledComponents: {
+        admissionFee: boolean;
+        tuitionFee: boolean;
+        examFee: boolean;
+        libraryFee: boolean;
+        computerFee: boolean;
+        transportFee: boolean;
+        sportsFee: boolean;
+        miscFee: boolean;
+    };
+    createdAt?: number;
+    updatedAt?: number;
 }
 
 export interface Payment {

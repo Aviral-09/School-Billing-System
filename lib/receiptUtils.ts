@@ -1,6 +1,6 @@
 
 import { db } from '@/lib/firebase';
-import { collection, addDoc, getDocs, doc, getDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
 import { Receipt } from '@/types';
 import { SCHOOL_CONFIG } from '@/lib/schoolConfig';
 
@@ -23,17 +23,39 @@ export const createReceipt = async (
     },
     studentId: string,
     generatedBy: string = 'System'
-): Promise<{ id: string, receipt: Receipt, student: any }> => {
+): Promise<{ id: string, receipt: Receipt, student: Record<string, unknown> | undefined }> => {
     try {
-
+        let studentData = null;
+        
+        // 1. Try to fetch directly by document key (e.g. ST-12345 or uid)
         const studentRef = doc(db, 'students', studentId);
         const studentSnap = await getDoc(studentRef);
+        if (studentSnap.exists()) {
+            studentData = studentSnap.data();
+        }
 
-        if (!studentSnap.exists()) {
+        // 2. If not found, query students collection by studentId field
+        if (!studentData) {
+            const fieldQuery = query(collection(db, 'students'), where('studentId', '==', studentId));
+            const fieldSnap = await getDocs(fieldQuery);
+            if (!fieldSnap.empty) {
+                studentData = fieldSnap.docs[0].data();
+            }
+        }
+
+        // 3. Fallback: query by userId field
+        if (!studentData) {
+            const userQuery = query(collection(db, 'students'), where('userId', '==', studentId));
+            const userSnap = await getDocs(userQuery);
+            if (!userSnap.empty) {
+                studentData = userSnap.docs[0].data();
+            }
+        }
+
+        if (!studentData) {
             throw new Error(`Student ${studentId} not found`);
         }
 
-        const studentData = studentSnap.data();
         const userId = studentData.userId;
 
 

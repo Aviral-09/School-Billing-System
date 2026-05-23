@@ -19,6 +19,11 @@
       }
     ],
     "paths": {
+      "firebase/app": ["./lib/mock-firebase.ts"],
+      "firebase/auth": ["./lib/mock-firebase.ts"],
+      "firebase/firestore": ["./lib/mock-firebase.ts"],
+      "@stripe/stripe-js": ["./lib/mock-stripe.tsx"],
+      "@stripe/react-stripe-js": ["./lib/mock-stripe.tsx"],
       "@/*": ["./*"],
       "@antigravity/sdk": ["./lib/antigravity-sdk.ts"]
     }

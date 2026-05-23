@@ -49,3 +49,7 @@ lint_output.txt
 fresh_lint_errors.txt
 install_final.log
 *.log
+
+# agentic lock files
+skills-lock.json
+

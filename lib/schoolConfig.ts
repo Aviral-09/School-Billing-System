@@ -14,9 +14,9 @@ export const SCHOOL_CONFIG = {
     academicYear: '2025–2026',
 } as const;
 
-/**
- * Full class list for the school (Class 1 – Class 12).
- * Used in every dropdown, filter, and form across the app.
- * Single source of truth — edit here to rename or extend.
- */
-export const CLASSES: string[] = Array.from({ length: 12 }, (_, i) => `Class ${i + 1}`);
+export const CLASSES: string[] = [
+    'Nursery', 'LKG', 'UKG',
+    ...Array.from({ length: 12 }, (_, i) => `Class ${i + 1}`)
+];
+
+export const SESSIONS: string[] = ['2024-25', '2025-26', '2026-27', '2027-28'];

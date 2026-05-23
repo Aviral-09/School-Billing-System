@@ -5,8 +5,9 @@ import { useSearchParams } from 'next/navigation';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { db } from '@/lib/firebase';
-import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { useAuth } from '@/context/AuthContext';
+import { createReceipt } from '@/lib/receiptUtils';
 
 function SuccessContent() {
     const searchParams = useSearchParams();
@@ -50,20 +51,49 @@ function SuccessContent() {
                 if (data.status === 'paid') {
                     const q = query(collection(db, 'payments'), where('stripeSessionId', '==', sessionId));
                     const existing = await getDocs(q);
+                    const payId = 'PAY-' + Date.now();
 
                     if (existing.empty) {
                         await addDoc(collection(db, 'payments'), {
-                            paymentId: 'PAY-' + Date.now(),
+                            paymentId: payId,
                             studentId: studentId,
                             userId: user?.uid || '',
                             amount: Number(amount),
                             status: 'paid',
+                            paymentStatus: 'success',
                             stripeSessionId: sessionId,
-                            createdAt: Date.now()
+                            createdAt: Date.now(),
+                            updatedAt: Date.now()
                         });
                         console.log("Payment recorded in Firestore");
                     } else {
-                        console.log("Payment already recorded");
+                        for (const docSnap of existing.docs) {
+                            await updateDoc(doc(db, 'payments', docSnap.id), {
+                                status: 'paid',
+                                paymentStatus: 'success',
+                                updatedAt: Date.now()
+                            });
+                        }
+                        console.log("Payment updated in Firestore");
+                    }
+
+                    // Generate Receipt dynamically on payment success
+                    try {
+                        const receiptsQ = query(collection(db, 'receipts'), where('transactionId', '==', sessionId));
+                        const receiptsSnap = await getDocs(receiptsQ);
+                        if (receiptsSnap.empty) {
+                            const actualPayId = existing.empty ? payId : (existing.docs[0].data() as any).paymentId || payId;
+                            await createReceipt({
+                                amount: Number(amount),
+                                paymentId: actualPayId,
+                                method: 'online_stripe',
+                                status: 'paid',
+                                transactionId: sessionId
+                            }, studentId, 'Stripe Checkout');
+                            console.log("Receipt generated successfully in Firestore");
+                        }
+                    } catch (receiptErr) {
+                        console.error("Receipt generation error during payment success:", receiptErr);
                     }
 
                     setStatus('success');

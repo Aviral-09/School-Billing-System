@@ -78,7 +78,7 @@ function ReturnContent() {
                         }
                     } else if (studentId && amount) {
                         // Fallback: Create record if for some reason it wasn't created in checkout_sessions
-                        const pRef = await addDoc(collection(db, 'payments'), {
+                        await addDoc(collection(db, 'payments'), {
                             paymentId: 'PAY-' + Date.now(),
                             studentId: studentId,
                             userId: user?.uid || '',

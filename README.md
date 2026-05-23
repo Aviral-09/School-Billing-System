@@ -27,18 +27,25 @@ Built with **Next.js 14**, **Firebase (Firestore & Auth)**, and **Stripe Integra
 - **Full Lifecycle Tracking**: Payments now track through **Pending → Success → Failed → Cancelled** states for a complete audit trail.
 - **Multi-Factor Authentication**: Native support for **Email + Password** and **Google OAuth**, with role-based redirection logic.
 
+### 🧪 Zero-Dependency Local Mock Database
+- **Local Storage Firebase Engine**: The application includes a custom Mock Firebase (`mock-firebase.ts`) that intercepts and simulates Firebase Authentication and Firestore DB interactions inside the browser's `localStorage`.
+- **Dynamic Student Auth & Name Resolution**: Student credentials registered via the Admin Suite automatically populate the local user database, resolving the student's full name and unique `uid` rather than resorting to hardcoded accounts.
+- **Unique ID Generation & List Stability**: Newly created students dynamically receive unique Student IDs (`ST-xxxxx`) mapped to their academic fees, and lists use robust fallback key parameters (`student.studentId || student.userId`) to guarantee React UI stability.
+
 ---
 
 ## 🚀 Features
 
 ### 👑 Admin Power Suite
-- **Student Account Autopilot**: Admins can now create student accounts, set initial passwords, and instantiate profile data (Class, Section, Fees) in a single unified workflow.
-- **Unified Analytics**: Monitor Total Revenue, Student Enrollment, and Pending Collections in real-time.
+- **Class-wise Fee Structure Management**: Add, update, duplicate, and delete custom fee structures with enable/disable switches for Admission, Tuition, Exam, Library, Computer, Transport, Sports, and Miscellaneous fee components. Prevents duplicates for class + session configurations.
+- **Class Management & Bulk Operations**: Live enrollment and collection targets grouped by class. Supports bulk reassignment/copying of fee structures to all students in a class for a specific academic session with safety confirmation checks.
+- **Student Account Autopilot**: Admins can create student accounts, assign them to academic sessions and classes, which automatically links the correct fee structures and sets total payable amounts.
+- **Unified Analytics**: Monitor Total Revenue, Student Enrollment, and Pending Collections in real-time, calculated directly from granular student-level fee structures.
 - **Manual Payment Override**: Record cash payments and generate digital receipts manually with the same professional branding.
 
 ### 🎓 Student Experience
-- **Personalized Billing Dashboards**: Detailed breakdown of Tuition, Transport, and Exam fees with real-time payment status.
-- **One-Click Payments**: Securely handle outstanding fees using Stripe's premium checkout experience.
+- **Personalized Billing Dashboards**: Dynamic itemized breakdown of Tuition, Transport, Exam, and custom fees matching the student's assigned `feeStructure`.
+- **One-Click Payments**: Securely handle outstanding fees using Stripe's premium checkout experience, automatically referencing the student's own payable fee balance.
 - **Digital Receipt Archive**: A permanent, downloadable history of every transaction ever made.
 
 ---

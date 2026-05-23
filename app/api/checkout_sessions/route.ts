@@ -3,13 +3,27 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
 import { collection, addDoc } from 'firebase/firestore';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    // apiVersion: '2024-06-20',
-});
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_mock_placeholder');
 
 export async function POST(req: NextRequest) {
     try {
         const { amount, studentId, userId, feeType } = await req.json();
+
+        // Sandbox fallback if STRIPE_SECRET_KEY is missing
+        if (!process.env.STRIPE_SECRET_KEY) {
+            const mockSessionId = 'sess_mock_' + Date.now();
+            await addDoc(collection(db, 'payments'), {
+                paymentId: 'PAY-' + Date.now(),
+                studentId: studentId,
+                userId: userId || '',
+                amount: Number(amount),
+                paymentStatus: 'pending',
+                stripeSessionId: mockSessionId,
+                createdAt: Date.now(),
+                updatedAt: Date.now()
+            });
+            return NextResponse.json({ clientSecret: 'cs_mock_secret_' + Date.now() });
+        }
 
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],

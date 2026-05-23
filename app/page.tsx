@@ -1,34 +1,99 @@
 'use client';
 
-import Link from 'next/link';
 import { SCHOOL_CONFIG } from '@/lib/schoolConfig';
-import {
-    AcademicCapIcon,
-    CurrencyDollarIcon,
-    UserGroupIcon,
-    ChartBarIcon,
-    ShieldCheckIcon,
-    ArrowRightIcon
-} from '@heroicons/react/24/outline';
+import { HeroFinancial } from '@/components/hero-financial';
+import { motion } from 'motion/react';
+import BorderGlow from '@/components/BorderGlow';
+import { AcademicCapIcon } from '@heroicons/react/24/outline';
+import { ProblemSolution } from '@/components/landing/ProblemSolution';
+import { BentoGrid } from '@/components/landing/BentoGrid';
+import { Testimonials } from '@/components/landing/Testimonials';
+import { Pricing } from '@/components/landing/Pricing';
+import { FAQ } from '@/components/landing/FAQ';
+
+const InteractiveWallet = () => (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ position: 'relative', zIndex: 1 }}>
+        <path d="M4 6h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z" />
+        <motion.path 
+            variants={{ hover: { y: -3, stroke: "#38bdf8" } }}
+            transition={{ type: "spring", stiffness: 300, damping: 10 }}
+            d="M12 6V3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v3" 
+            stroke="#7dd3fc"
+        />
+        <motion.path 
+            variants={{ hover: { x: 2 } }}
+            transition={{ type: "spring", stiffness: 300, damping: 10 }}
+            d="M18 11h3v2h-3v-2z" 
+        />
+    </svg>
+);
+
+const InteractiveUsers = () => (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ position: 'relative', zIndex: 1 }}>
+        <circle cx="9" cy="7" r="4" />
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+        <motion.g
+            variants={{ hover: { x: 3, y: -1, stroke: "#38bdf8" } }}
+            transition={{ type: "spring", stiffness: 200, damping: 12 }}
+            stroke="#7dd3fc"
+        >
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+        </motion.g>
+    </svg>
+);
+
+const InteractiveChart = () => (
+    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 26, width: 26, justifyContent: 'center', position: 'relative', zIndex: 1 }}>
+        <motion.div 
+            variants={{ hover: { height: ["40%", "80%", "60%"] } }}
+            transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
+            style={{ width: 4, height: "40%", background: "#7dd3fc", borderRadius: 2 }}
+        />
+        <motion.div 
+            variants={{ hover: { height: ["100%", "50%", "90%"] } }}
+            transition={{ repeat: Infinity, duration: 1, ease: "easeInOut", delay: 0.1 }}
+            style={{ width: 4, height: "80%", background: "#0ea5e9", borderRadius: 2, boxShadow: '0 0 8px rgba(14,165,233,0.4)' }}
+        />
+        <motion.div 
+            variants={{ hover: { height: ["60%", "90%", "40%"] } }}
+            transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut", delay: 0.2 }}
+            style={{ width: 4, height: "60%", background: "#7dd3fc", borderRadius: 2 }}
+        />
+    </div>
+);
+
+const InteractiveShield = () => (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ position: 'relative', zIndex: 1 }}>
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        <motion.path 
+            initial={{ pathLength: 0 }}
+            variants={{ hover: { pathLength: 1, stroke: "#38bdf8" } }}
+            transition={{ duration: 0.5, ease: "easeInOut" }}
+            d="M9 11l2 2 4-4"
+            style={{ filter: 'drop-shadow(0 0 4px rgba(56,189,248,0.5))' }}
+        />
+    </svg>
+);
 
 const features = [
     {
-        icon: CurrencyDollarIcon,
+        icon: InteractiveWallet,
         title: 'Fee Management',
         description: 'Track tuition, transport, and exam fees for all students with a unified dashboard.',
     },
     {
-        icon: UserGroupIcon,
+        icon: InteractiveUsers,
         title: 'Student Portals',
         description: 'Dedicated access for students to view balances, make payments, and download receipts.',
     },
     {
-        icon: ChartBarIcon,
+        icon: InteractiveChart,
         title: 'Admin Analytics',
         description: 'Real-time revenue tracking, pending due reports, and class-wise fee summaries.',
     },
     {
-        icon: ShieldCheckIcon,
+        icon: InteractiveShield,
         title: 'Secure Payments',
         description: 'End-to-end encrypted payments via Stripe with automatic digital receipt generation.',
     },
@@ -36,104 +101,169 @@ const features = [
 
 export default function HomePage() {
     return (
-        <div className="min-h-screen bg-black text-white selection:bg-yellow-500/30">
+        <div style={{ minHeight: '100vh', background: '#ffffff' }}>
 
-            {/* Top Bar */}
-            <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-yellow-500/20">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="bg-white p-2 rounded-xl border border-yellow-500/30">
-                            <AcademicCapIcon className="w-6 h-6 text-black" />
-                        </div>
-                        <span className="text-xl font-bold text-white tracking-tight">
-                            {SCHOOL_CONFIG.shortName} <span className="text-yellow-500">Portal</span>
-                        </span>
-                    </div>
-                    <Link
-                        href="/login"
-                        className="inline-flex items-center gap-2 bg-white hover:bg-gray-200 text-black px-6 py-2.5 rounded-xl font-bold text-sm shadow-lg border border-yellow-500/30 transition-all active:scale-95"
-                    >
-                        Staff / Student Login
-                        <ArrowRightIcon className="w-4 h-4" />
-                    </Link>
-                </div>
-            </header>
+            {/* ── HERO ── */}
+            <HeroFinancial />
 
-            {/* Hero */}
-            <section className="relative pt-24 pb-28 overflow-hidden">
-                <div className="absolute top-20 left-1/4 w-72 h-72 bg-yellow-500/8 blur-[120px] rounded-full pointer-events-none" />
-                <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-white/5 blur-[120px] rounded-full pointer-events-none" />
+            {/* ── FEATURES ── */}
+            <section id="features" className="py-16 md:py-24 px-6 md:px-8 relative overflow-hidden" style={{ background: '#ffffff' }}>
+                {/* Background decorative blobs */}
+                <div style={{ position: 'absolute', top: '-10%', left: '-5%', width: '500px', height: '500px', background: 'radial-gradient(circle, rgba(56,189,248,0.05) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
+                <div style={{ position: 'absolute', bottom: '-10%', right: '-5%', width: '600px', height: '600px', background: 'radial-gradient(circle, rgba(14,165,233,0.06) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
 
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 text-xs font-black uppercase tracking-widest mb-8">
-                        Academic Year {SCHOOL_CONFIG.academicYear}
-                    </div>
-
-                    <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter mb-6 leading-tight">
-                        {SCHOOL_CONFIG.name}
-                    </h1>
-                    <p className="text-lg md:text-xl text-slate-400 mb-4 leading-relaxed max-w-2xl mx-auto">
-                        {SCHOOL_CONFIG.tagline}
-                    </p>
-                    <p className="text-sm text-slate-500 mb-12">
-                        Internal Billing & Fee Management System
-                    </p>
-
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                        <Link
-                            href="/login"
-                            className="w-full sm:w-auto px-10 py-5 bg-white hover:bg-gray-100 text-black font-black text-lg rounded-2xl shadow-2xl border border-yellow-500/30 transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-3"
+                <div style={{ maxWidth: 'var(--page-max-width)', margin: '0 auto', position: 'relative', zIndex: 10 }}>
+                    <div style={{ position: 'relative', textAlign: 'center', marginBottom: 64 }}>
+                        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 300, height: 150, background: 'radial-gradient(ellipse, rgba(56,189,248,0.15) 0%, transparent 70%)', zIndex: 0, pointerEvents: 'none' }} />
+                        <motion.div 
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                            viewport={{ once: true, margin: "-50px" }}
+                            style={{ position: 'relative', zIndex: 1 }}
                         >
-                            Login to Portal
-                            <ArrowRightIcon className="w-5 h-5" />
-                        </Link>
-                        <Link
-                            href="/student/dashboard"
-                            className="w-full sm:w-auto px-10 py-5 bg-transparent text-white font-bold text-lg rounded-2xl border border-yellow-500/20 hover:border-yellow-500/60 transition-all"
-                        >
-                            Student Dashboard
-                        </Link>
+                            <h2 style={{
+                                fontFamily: 'var(--font-heading)',
+                                fontSize: 'clamp(32px, 5vw, 48px)',
+                                fontWeight: 600,
+                                letterSpacing: '-0.04em',
+                                color: '#0f172a',
+                            }}>Everything in one place</h2>
+                        </motion.div>
                     </div>
-                </div>
-            </section>
 
-            {/* Features */}
-            <section className="py-20 border-t border-yellow-500/10">
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-16">
-                        <h2 className="text-yellow-500 font-bold uppercase tracking-widest text-xs mb-3">System Capabilities</h2>
-                        <h3 className="text-4xl font-black text-white">Everything in one place</h3>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {features.map((f) => (
-                            <div
-                                key={f.title}
-                                className="glass-card p-8 rounded-[2rem] border border-yellow-500/20 hover:border-yellow-500/60 transition-all group"
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 24 }}>
+                        {features.map((f, index) => (
+                            <motion.div 
+                                key={f.title} 
+                                initial="initial"
+                                whileInView="animate"
+                                whileHover="hover"
+                                viewport={{ once: true, margin: "-50px" }}
+                                variants={{
+                                    initial: { opacity: 0, y: 40 },
+                                    animate: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: index * 0.1 } },
+                                    hover: { y: -8, transition: { duration: 0.4, ease: "easeOut" } }
+                                }}
                             >
-                                <div className="bg-white/10 w-12 h-12 rounded-xl flex items-center justify-center mb-5 border border-yellow-500/20 group-hover:scale-110 transition-transform">
-                                    <f.icon className="w-6 h-6 text-yellow-400" />
-                                </div>
-                                <h4 className="text-lg font-bold text-white mb-2">{f.title}</h4>
-                                <p className="text-slate-400 text-sm leading-relaxed">{f.description}</p>
-                            </div>
+                                <BorderGlow
+                                    edgeSensitivity={40}
+                                    glowColor="200 90 60"
+                                    backgroundColor="rgba(255, 255, 255, 0.9)"
+                                    borderRadius={24}
+                                    glowRadius={40}
+                                    glowIntensity={1}
+                                    coneSpread={30}
+                                    animated={false}
+                                    colors={['#38bdf8', '#7dd3fc', '#0ea5e9']}
+                                    style={{ width: '100%', height: '100%', backdropFilter: 'blur(10px)', cursor: 'default' }}
+                                >
+                                    <div style={{ padding: 32, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                                        <motion.div 
+                                            variants={{
+                                                initial: { rotate: 0, scale: 1 },
+                                                hover: { rotate: [0, -6, 6, -3, 0], scale: 1.05, transition: { duration: 0.6, ease: 'easeInOut' } }
+                                            }}
+                                            style={{
+                                                width: 48, height: 48, borderRadius: 14,
+                                                background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                marginBottom: 20,
+                                                boxShadow: '0 8px 16px rgba(14,165,233,0.12), inset 0 2px 0 rgba(255,255,255,0.8)',
+                                                position: 'relative',
+                                                border: '1px solid #bae6fd'
+                                            }}
+                                        >
+                                            {/* Localized Hover Glow Effect */}
+                                            <motion.div
+                                                variants={{
+                                                    initial: { scale: 0, opacity: 0 },
+                                                    hover: { scale: 1, opacity: 1, transition: { duration: 0.4 } }
+                                                }}
+                                                style={{
+                                                    position: 'absolute',
+                                                    inset: -20,
+                                                    background: 'radial-gradient(circle, rgba(56,189,248,0.2) 0%, transparent 70%)',
+                                                    filter: 'blur(8px)',
+                                                    borderRadius: '50%',
+                                                    zIndex: 0,
+                                                }}
+                                            />
+                                            <f.icon />
+                                        </motion.div>
+                                        <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: 18, fontWeight: 600, color: '#0f172a', marginBottom: 8, position: 'relative', letterSpacing: '-0.02em' }}>{f.title}</h3>
+                                        <p style={{ fontSize: 14, color: '#64748b', lineHeight: 1.6, fontWeight: 400, position: 'relative' }}>{f.description}</p>
+                                    </div>
+                                </BorderGlow>
+                            </motion.div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* Footer */}
-            <footer className="py-10 border-t border-yellow-500/10">
-                <div className="max-w-7xl mx-auto px-4 text-center space-y-2">
-                    <div className="flex items-center justify-center gap-3 mb-4">
-                        <AcademicCapIcon className="w-5 h-5 text-yellow-500" />
-                        <span className="font-bold text-white">{SCHOOL_CONFIG.name}</span>
+            {/* ── PROBLEM / SOLUTION ── */}
+            <ProblemSolution />
+
+            {/* ── BENTO GRID ── */}
+            <BentoGrid />
+
+            {/* ── TESTIMONIALS ── */}
+            <Testimonials />
+
+            {/* ── PRICING ── */}
+            <Pricing />
+
+            {/* ── FAQ ── */}
+            <FAQ />
+
+            {/* ── ABOUT / CTA BANNER ── */}
+            <section id="about" className="py-16 md:py-24 px-6 md:px-8 relative overflow-hidden" style={{
+                background: '#0f172a',
+                borderTop: '1px solid #e2e8f0',
+            }}>
+                <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 600, height: 600, background: 'radial-gradient(circle, rgba(14,165,233,0.1) 0%, transparent 70%)', pointerEvents: 'none' }} />
+                <div style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(14,165,233,0.15)', borderRadius: 99, padding: '6px 16px', marginBottom: 24, border: '1px solid rgba(14,165,233,0.3)' }}>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: '#38bdf8', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Contact</span>
                     </div>
-                    <p className="text-slate-500 text-xs">{SCHOOL_CONFIG.address}</p>
-                    <p className="text-slate-500 text-xs">{SCHOOL_CONFIG.email} &bull; {SCHOOL_CONFIG.phone}</p>
-                    <p className="text-slate-600 text-xs mt-4">
-                        © {new Date().getFullYear()} {SCHOOL_CONFIG.name}. Internal use only. All rights reserved.
+                    <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: 'clamp(28px, 4vw, 40px)', fontWeight: 600, color: '#ffffff', letterSpacing: '-0.02em', marginBottom: 20 }}>
+                        Reach the administration
+                    </h2>
+                    <p style={{ fontSize: 16, color: '#94a3b8', lineHeight: 1.6, marginBottom: 40, fontWeight: 400 }}>
+                        {SCHOOL_CONFIG.address}
                     </p>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                        <a href={`mailto:${SCHOOL_CONFIG.email}`} style={{
+                            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                            padding: '12px 24px', borderRadius: 12, fontSize: 15, fontWeight: 600,
+                            background: '#0ea5e9', color: '#ffffff', textDecoration: 'none',
+                            boxShadow: '0 4px 14px 0 rgba(14, 165, 233, 0.39)', transition: 'all 0.2s ease', width: '100%', maxWidth: '280px'
+                        }}>
+                            {SCHOOL_CONFIG.email}
+                        </a>
+                        <a href={`tel:${SCHOOL_CONFIG.phone}`} style={{ 
+                            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                            padding: '12px 24px', borderRadius: 12, fontSize: 15, fontWeight: 600,
+                            background: 'transparent', color: '#e2e8f0', textDecoration: 'none',
+                            border: '1px solid #334155', transition: 'all 0.2s ease', width: '100%', maxWidth: '280px'
+                        }}>
+                            {SCHOOL_CONFIG.phone}
+                        </a>
+                    </div>
                 </div>
+            </section>
+
+            {/* ── FOOTER ── */}
+            <footer style={{ padding: '28px 32px', background: 'var(--color-cloud-canvas)', borderTop: '1px solid var(--color-ghost-border)', textAlign: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 6 }}>
+                    <div style={{ background: 'var(--color-electric-violet)', borderRadius: 6, padding: 4 }}>
+                        <AcademicCapIcon style={{ width: 14, height: 14, color: '#fff' }} />
+                    </div>
+                    <span style={{ fontFamily: 'var(--font-heading)', fontSize: 14, fontWeight: 700, color: 'var(--color-midnight-ink)' }}>{SCHOOL_CONFIG.name}</span>
+                </div>
+                <p style={{ fontSize: 12, color: '#999', fontWeight: 500 }}>
+                    © {new Date().getFullYear()} {SCHOOL_CONFIG.name}. Internal use only. All rights reserved.
+                </p>
             </footer>
         </div>
     );

@@ -29,6 +29,26 @@ export default function SeedPage() {
         }
     };
 
+    const makeRajAdmin = async () => {
+        try {
+            const { signInWithEmailAndPassword } = await import('firebase/auth');
+            const result = await signInWithEmailAndPassword(auth, "newraj990@gmail.com", "12345678");
+            const user = result.user;
+
+            await setDoc(doc(db, 'users', user.uid), {
+                uid: user.uid,
+                email: user.email,
+                role: 'admin',
+                createdAt: Date.now()
+            });
+
+            setStatus('Success! newraj990@gmail.com is now an Admin.');
+        } catch (error: unknown) {
+            const err = error as Error;
+            setStatus('Error: ' + err.message);
+        }
+    };
+
     const createStudent = async () => {
         try {
             const provider = new GoogleAuthProvider();
@@ -87,6 +107,13 @@ export default function SeedPage() {
                     className="bg-green-600 text-white px-4 py-2 rounded"
                 >
                     Login & Make Me STUDENT
+                </button>
+
+                <button
+                    onClick={makeRajAdmin}
+                    className="bg-blue-600 text-white px-4 py-2 rounded"
+                >
+                    Make newraj990@gmail.com ADMIN
                 </button>
             </div>
 

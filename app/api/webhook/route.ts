@@ -6,9 +6,7 @@ import { createReceipt } from '@/lib/receiptUtils';
 import { generateServerReceiptPDF } from '@/lib/pdf_server';
 import { sendReceiptEmail } from '@/lib/email';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    // apiVersion: '2025-01-27.acacia',
-});
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_mock_placeholder');
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -127,7 +125,7 @@ async function handlePaymentStatus(sessionId: string, status: 'success' | 'faile
             try {
                 const pdfBuffer = generateServerReceiptPDF(result.receipt);
                 // Use parentEmail from student profile, fall back to payment user email if needed
-                const recipientEmail = result.student.parentEmail || '';
+                const recipientEmail = (result.student as any)?.parentEmail || '';
 
                 if (recipientEmail) {
                     await sendReceiptEmail({

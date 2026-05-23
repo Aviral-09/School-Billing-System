@@ -2,112 +2,117 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { SCHOOL_CONFIG } from '@/lib/schoolConfig';
 import {
     AcademicCapIcon,
     Bars3Icon as MenuIcon,
     XMarkIcon as XIcon,
-    UserCircleIcon
+    UserCircleIcon,
+    ArrowRightOnRectangleIcon,
 } from '@heroicons/react/24/outline';
 
 export default function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const { user, role } = useAuth();
+    const pathname = usePathname();
 
     return (
-        <nav className="bg-black border-b border-yellow-500/20 sticky top-0 z-50 backdrop-blur-md bg-opacity-80">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between h-20">
-                    {/* Logo */}
-                    <div className="flex items-center">
-                        <Link href="/" className="flex items-center gap-3 group">
-                            <div className="bg-white p-2 rounded-xl shadow-lg border border-yellow-500/30 group-hover:scale-110 transition-transform">
-                                <AcademicCapIcon className="w-6 h-6 text-black" />
-                            </div>
-                            <span className="text-xl font-bold text-white tracking-tight">
-                                {SCHOOL_CONFIG.shortName}{' '}
-                                <span className="text-yellow-500">Portal</span>
-                            </span>
-                        </Link>
+        <header className="nav-sticky">
+            <div style={{ maxWidth: 'var(--page-max-width)', margin: '0 auto', padding: '0 32px', height: 68, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+
+                {/* Logo */}
+                <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
+                    <div style={{ background: 'var(--color-electric-violet)', borderRadius: 10, padding: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <AcademicCapIcon style={{ width: 18, height: 18, color: '#fff' }} />
                     </div>
+                    <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 17, color: 'var(--color-midnight-ink)', letterSpacing: '-0.4px' }}>
+                        {SCHOOL_CONFIG.shortName}<span style={{ color: 'var(--color-electric-violet)' }}> Portal</span>
+                    </span>
+                </Link>
 
-                    {/* Desktop Nav */}
-                    <div className="hidden md:flex items-center space-x-8">
-                        {user && role === 'student' && (
-                            <>
-                                <Link href="/student/dashboard" className="text-gray-400 hover:text-white transition-colors font-medium">
-                                    My Dashboard
-                                </Link>
-                                <Link href="/payment" className="text-gray-400 hover:text-white transition-colors font-medium">
-                                    Pay Fees
-                                </Link>
-                            </>
-                        )}
-                        {user && role === 'admin' && (
-                            <Link href="/admin/dashboard" className="text-gray-400 hover:text-white transition-colors font-medium">
-                                Admin Panel
-                            </Link>
-                        )}
-
-                        {user ? (
-                            <div className="flex items-center gap-4 pl-6 border-l border-white/10">
-                                <div className="text-right">
-                                    <p className="text-sm font-bold text-white leading-tight">
-                                        {user.displayName || 'User'}
-                                    </p>
-                                    <p className="text-[10px] text-yellow-500 font-bold uppercase tracking-widest">
-                                        {role || 'Student'}
-                                    </p>
-                                </div>
-                                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center border border-yellow-500/20">
-                                    <UserCircleIcon className="w-6 h-6 text-white" />
-                                </div>
-                            </div>
-                        ) : (
-                            <Link
-                                href="/login"
-                                className="bg-white hover:bg-gray-200 text-black px-6 py-2.5 rounded-xl font-bold shadow-lg border border-yellow-500/30 transition-all active:scale-95"
-                            >
-                                Login
-                            </Link>
-                        )}
-                    </div>
-
-                    {/* Mobile hamburger */}
-                    <div className="md:hidden flex items-center">
-                        <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-gray-400">
-                            {isMenuOpen ? <XIcon className="w-6 h-6" /> : <MenuIcon className="w-6 h-6" />}
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            {/* Mobile Menu */}
-            {isMenuOpen && (
-                <div className="md:hidden bg-black border-t border-yellow-500/20 p-4 space-y-4">
+                {/* Desktop nav */}
+                <nav style={{ display: 'flex', alignItems: 'center', gap: 6 }} className="hidden-mobile">
                     {user && role === 'student' && (
                         <>
-                            <Link href="/student/dashboard" className="block px-4 py-3 text-gray-400 hover:text-white rounded-xl">
-                                My Dashboard
-                            </Link>
-                            <Link href="/payment" className="block px-4 py-3 text-gray-400 hover:text-white rounded-xl">
-                                Pay Fees
-                            </Link>
+                            <Link href="/student/dashboard" className={`nav-link${pathname === '/student/dashboard' ? ' active' : ''}`}>My Dashboard</Link>
+                            <Link href="/payment" className={`nav-link${pathname === '/payment' ? ' active' : ''}`}>Pay Fees</Link>
                         </>
                     )}
                     {user && role === 'admin' && (
-                        <Link href="/admin/dashboard" className="block px-4 py-3 text-gray-400 hover:text-white rounded-xl">
-                            Admin Panel
-                        </Link>
+                        <Link href="/admin/dashboard" className={`nav-link${pathname.startsWith('/admin') ? ' active' : ''}`}>Admin Panel</Link>
                     )}
-                    {!user && (
-                        <Link href="/login" className="block px-4 py-3 bg-white text-black rounded-xl text-center font-bold border border-yellow-500/30">
-                            Login
-                        </Link>
+
+                    {user ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: 12, paddingLeft: 16, borderLeft: '1px solid var(--color-ghost-border)' }}>
+                            <div style={{ textAlign: 'right' }}>
+                                <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-midnight-ink)', margin: 0 }}>{user.displayName || 'User'}</p>
+                                <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-electric-violet)', textTransform: 'uppercase', letterSpacing: '0.07em', margin: 0 }}>{role}</p>
+                            </div>
+                            <div style={{
+                                width: 36, height: 36, borderRadius: '50%',
+                                background: 'var(--color-violet-subtle)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                border: '1px solid var(--color-ghost-border)',
+                            }}>
+                                <UserCircleIcon style={{ width: 20, height: 20, color: 'var(--color-electric-violet)' }} />
+                            </div>
+                            <button
+                                className="btn-ghost"
+                                onClick={async () => {
+                                    const { auth } = await import('@/lib/firebase');
+                                    if (typeof (auth as any).signOut === 'function') {
+                                        await (auth as any).signOut();
+                                    } else {
+                                        const { signOut } = await import('firebase/auth');
+                                        await signOut(auth as any);
+                                    }
+                                    window.location.href = '/login';
+                                }}
+                                title="Sign out"
+                                style={{ padding: '5px 8px' }}
+                            >
+                                <ArrowRightOnRectangleIcon style={{ width: 16, height: 16 }} />
+                            </button>
+                        </div>
+                    ) : (
+                        <Link href="/login" className="btn-primary" style={{ marginLeft: 8 }}>Sign In</Link>
                     )}
+                </nav>
+
+                {/* Mobile burger */}
+                <button
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    style={{ display: 'none', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-muted-ash)', padding: 4 }}
+                    id="mobile-menu-btn"
+                >
+                    {isMenuOpen ? <XIcon style={{ width: 22, height: 22 }} /> : <MenuIcon style={{ width: 22, height: 22 }} />}
+                </button>
+            </div>
+
+            {/* Mobile drawer */}
+            {isMenuOpen && (
+                <div style={{ background: 'var(--color-paper-white)', borderTop: '1px solid var(--color-ghost-border)', padding: '12px 24px 20px' }}>
+                    {user && role === 'student' && (
+                        <>
+                            <Link href="/student/dashboard" className="nav-link" style={{ display: 'block', marginBottom: 4 }}>My Dashboard</Link>
+                            <Link href="/payment" className="nav-link" style={{ display: 'block', marginBottom: 4 }}>Pay Fees</Link>
+                        </>
+                    )}
+                    {user && role === 'admin' && (
+                        <Link href="/admin/dashboard" className="nav-link" style={{ display: 'block', marginBottom: 4 }}>Admin Panel</Link>
+                    )}
+                    {!user && <Link href="/login" className="btn-primary" style={{ display: 'block', textAlign: 'center', marginTop: 8 }}>Sign In</Link>}
                 </div>
             )}
-        </nav>
+
+            <style>{`
+                @media (max-width: 768px) {
+                    .hidden-mobile { display: none !important; }
+                    #mobile-menu-btn { display: flex !important; }
+                }
+            `}</style>
+        </header>
     );
 }

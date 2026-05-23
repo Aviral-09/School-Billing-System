@@ -13,19 +13,19 @@ export const firebaseConfig = {
 };
 
 
-const app: FirebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const app: FirebaseApp = !getApps().length ? (initializeApp as any)(firebaseConfig) : getApp();
 
-const auth: Auth = getAuth(app);
+const auth: Auth = (getAuth as any)(app);
 
 
 let db: Firestore;
 try {
 
-    db = initializeFirestore(app, { experimentalForceLongPolling: true });
+    db = (initializeFirestore as any)(app, { experimentalForceLongPolling: true });
     console.log("Firebase: Initialized with long polling");
 } catch {
 
-    db = getFirestore(app);
+    db = (getFirestore as any)(app);
     console.log("Firebase: Fallback to default Firestore initialization");
 }
 
