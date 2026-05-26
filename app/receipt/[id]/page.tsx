@@ -8,6 +8,7 @@ import { Receipt } from '@/types';
 import { useRouter } from 'next/navigation';
 import { downloadPDF } from '@/lib/pdf';
 import { ArrowDownTrayIcon, PrinterIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { SCHOOL_CONFIG } from '@/lib/schoolConfig';
 
 export default function ReceiptPage({ params }: { params: Promise<{ id: string }> }) {
     const { id: receiptDocId } = use(params);
@@ -119,7 +120,7 @@ export default function ReceiptPage({ params }: { params: Promise<{ id: string }
 
             <div className="max-w-3xl mx-auto mb-8 flex flex-col sm:flex-row justify-between items-center print:hidden relative z-10 gap-4">
                 <button
-                    onClick={() => router.back()}
+                    onClick={() => router.push(role === 'admin' ? '/admin/dashboard' : '/student/dashboard')}
                     className="text-white/40 hover:text-white transition-colors flex items-center gap-2 font-bold group"
                 >
                     <ArrowLeftIcon className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
@@ -157,12 +158,11 @@ export default function ReceiptPage({ params }: { params: Promise<{ id: string }
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                                 </svg>
                             </div>
-                            <h1 className="text-3xl font-black text-black uppercase tracking-tight">EduBill Institute</h1>
+                            <h1 className="text-3xl font-black text-black uppercase tracking-tight">{SCHOOL_CONFIG.name}</h1>
                         </div>
                         <p className="text-slate-500 text-sm leading-relaxed">
-                            123 Education Lane<br />
-                            Knowledge City, KC 40001<br />
-                            contact@edubill.com | +91 98765 43210
+                            {SCHOOL_CONFIG.address}<br />
+                            {SCHOOL_CONFIG.email} | {SCHOOL_CONFIG.phone}
                         </p>
                     </div>
                     <div className="text-right">

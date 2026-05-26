@@ -361,7 +361,7 @@ export function DashboardPreview() {
           <div style={{ background: '#5757f8', borderRadius: 8, padding: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <AcademicCapIcon style={{ width: 14, height: 14, color: '#fff' }} />
           </div>
-          <span style={{ fontWeight: 800, fontSize: 13, color: '#202020', whiteSpace: 'nowrap' }}>SPS <span style={{ color: '#5757f8' }}>Admin</span></span>
+          <span style={{ fontWeight: 800, fontSize: 13, color: '#202020', whiteSpace: 'nowrap' }}>SDS <span style={{ color: '#5757f8' }}>Admin</span></span>
         </div>
 
         {/* Nav - Only show on mobile to avoid repetition with sidebar on desktop */}

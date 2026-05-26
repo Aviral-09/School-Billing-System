@@ -216,40 +216,68 @@ export default function HomePage() {
             {/* ── FAQ ── */}
             <FAQ />
 
-            {/* ── ABOUT / CTA BANNER ── */}
+            {/* ── ABOUT / SCHOOL LOCATION ── */}
             <section id="about" className="py-16 md:py-24 px-6 md:px-8 relative overflow-hidden" style={{
-                background: '#0f172a',
+                background: '#ffffff',
                 borderTop: '1px solid #e2e8f0',
             }}>
-                <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 600, height: 600, background: 'radial-gradient(circle, rgba(14,165,233,0.1) 0%, transparent 70%)', pointerEvents: 'none' }} />
-                <div style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 1 }}>
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(14,165,233,0.15)', borderRadius: 99, padding: '6px 16px', marginBottom: 24, border: '1px solid rgba(14,165,233,0.3)' }}>
-                        <span style={{ fontSize: 12, fontWeight: 600, color: '#38bdf8', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Contact</span>
+                <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 600, height: 600, background: 'radial-gradient(circle, rgba(14,165,233,0.04) 0%, transparent 70%)', pointerEvents: 'none' }} />
+                
+                <div style={{ maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+                    <div style={{ textAlign: 'center', marginBottom: 40 }}>
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                            viewport={{ once: true }}
+                        >
+                            <h2 style={{
+                                fontFamily: 'var(--font-heading)',
+                                fontSize: 'clamp(32px, 5vw, 48px)',
+                                fontWeight: 600,
+                                color: '#0f172a',
+                                letterSpacing: '-0.04em',
+                                marginBottom: 12
+                            }}>
+                                School Location
+                            </h2>
+                            <p style={{
+                                fontSize: 18,
+                                color: '#64748b',
+                                lineHeight: 1.6,
+                                fontWeight: 400
+                            }}>
+                                Find our campus on Google Maps
+                            </p>
+                        </motion.div>
                     </div>
-                    <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: 'clamp(28px, 4vw, 40px)', fontWeight: 600, color: '#ffffff', letterSpacing: '-0.02em', marginBottom: 20 }}>
-                        Reach the administration
-                    </h2>
-                    <p style={{ fontSize: 16, color: '#94a3b8', lineHeight: 1.6, marginBottom: 40, fontWeight: 400 }}>
-                        {SCHOOL_CONFIG.address}
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                        <a href={`mailto:${SCHOOL_CONFIG.email}`} style={{
-                            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                            padding: '12px 24px', borderRadius: 12, fontSize: 15, fontWeight: 600,
-                            background: '#0ea5e9', color: '#ffffff', textDecoration: 'none',
-                            boxShadow: '0 4px 14px 0 rgba(14, 165, 233, 0.39)', transition: 'all 0.2s ease', width: '100%', maxWidth: '280px'
-                        }}>
-                            {SCHOOL_CONFIG.email}
-                        </a>
-                        <a href={`tel:${SCHOOL_CONFIG.phone}`} style={{ 
-                            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                            padding: '12px 24px', borderRadius: 12, fontSize: 15, fontWeight: 600,
-                            background: 'transparent', color: '#e2e8f0', textDecoration: 'none',
-                            border: '1px solid #334155', transition: 'all 0.2s ease', width: '100%', maxWidth: '280px'
-                        }}>
-                            {SCHOOL_CONFIG.phone}
-                        </a>
-                    </div>
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                        viewport={{ once: true }}
+                        style={{
+                            width: '100%',
+                            borderRadius: 24,
+                            overflow: 'hidden',
+                            boxShadow: '0 20px 40px -15px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(15, 23, 42, 0.04)',
+                            border: '1px solid #e2e8f0',
+                            backgroundColor: '#f8fafc',
+                        }}
+                    >
+                        <div className="w-full h-[300px] md:h-[400px] lg:h-[450px] overflow-hidden">
+                            <iframe 
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3501.8299754350933!2d77.4380803753585!3d28.634857475663548!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390cee24c0d68333%3A0x32591bcfce3de944!2sSwami%20Dayanand%20Sarswati%20Public%20School!5e0!3m2!1sen!2sin!4v1779820165377!5m2!1sen!2sin" 
+                                width="100%" 
+                                height="100%" 
+                                style={{ border: 0, display: 'block' }} 
+                                allowFullScreen={true} 
+                                loading="lazy" 
+                                referrerPolicy="no-referrer-when-downgrade"
+                            />
+                        </div>
+                    </motion.div>
                 </div>
             </section>
 

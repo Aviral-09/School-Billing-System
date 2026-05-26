@@ -327,7 +327,7 @@ function LoginContent() {
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                                 {/* Account list */}
                                 <button
-                                    onClick={() => handleSelectGoogleAccount('student@sps.edu')}
+                                    onClick={() => handleSelectGoogleAccount('student@sds.edu')}
                                     style={{
                                         display: 'flex',
                                         alignItems: 'center',
@@ -364,12 +364,12 @@ function LoginContent() {
                                                 Student
                                             </span>
                                         </div>
-                                        <span style={{ fontSize: 12, color: '#777' }}>student@sps.edu</span>
+                                        <span style={{ fontSize: 12, color: '#777' }}>student@sds.edu</span>
                                     </div>
                                 </button>
 
                                 <button
-                                    onClick={() => handleSelectGoogleAccount('admin@sps.edu')}
+                                    onClick={() => handleSelectGoogleAccount('admin@sds.edu')}
                                     style={{
                                         display: 'flex',
                                         alignItems: 'center',
@@ -406,7 +406,7 @@ function LoginContent() {
                                                 Admin
                                             </span>
                                         </div>
-                                        <span style={{ fontSize: 12, color: '#777' }}>admin@sps.edu</span>
+                                        <span style={{ fontSize: 12, color: '#777' }}>admin@sds.edu</span>
                                     </div>
                                 </button>
 

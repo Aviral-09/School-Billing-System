@@ -43,12 +43,12 @@ const setStore = (key: string, val: any) => {
 
 // Data seeding
 const defaultUsers: Record<string, any> = {
-    "admin-uid": { uid: "admin-uid", email: "admin@sps.edu", name: "Principal Administrator", role: "admin", createdAt: Date.now() },
-    "student-uid": { uid: "student-uid", email: "student@sps.edu", name: "Aarav Sharma", role: "student", createdAt: Date.now() }
+    "admin-uid": { uid: "admin-uid", email: "admin@sds.edu", name: "Principal Administrator", role: "admin", createdAt: Date.now() },
+    "student-uid": { uid: "student-uid", email: "student@sds.edu", name: "Aarav Sharma", role: "student", createdAt: Date.now() }
 };
 
 const defaultStudents: Record<string, any> = {
-    "ST-12345": { studentId: "ST-12345", name: "Aarav Sharma", class: "Class 10", parentEmail: "student@sps.edu", userId: "student-uid" }
+    "ST-12345": { studentId: "ST-12345", name: "Aarav Sharma", class: "Class 10", parentEmail: "student@sds.edu", userId: "student-uid" }
 };
 
 const defaultFees: Record<string, any> = {
@@ -222,9 +222,9 @@ export const signInWithPopup = async (authObj: any, provider: any) => {
     let customUserEmail = "";
     
     if (selectedEmail) {
-        if (selectedEmail === 'student@sps.edu') {
+        if (selectedEmail === 'student@sds.edu') {
             isStudent = true;
-        } else if (selectedEmail === 'admin@sps.edu') {
+        } else if (selectedEmail === 'admin@sds.edu') {
             isStudent = false;
         } else {
             customUserEmail = selectedEmail;
@@ -297,14 +297,14 @@ export const signInWithPopup = async (authObj: any, provider: any) => {
             }
         }
     } else if (isStudent) {
-        user = { uid: "student-uid", email: "student@sps.edu", displayName: "Aarav Sharma" };
+        user = { uid: "student-uid", email: "student@sds.edu", displayName: "Aarav Sharma" };
         const users = getStore("users", {});
-        users["student-uid"] = { uid: "student-uid", email: "student@sps.edu", name: "Aarav Sharma", role: "student", createdAt: Date.now() };
+        users["student-uid"] = { uid: "student-uid", email: "student@sds.edu", name: "Aarav Sharma", role: "student", createdAt: Date.now() };
         setStore("users", users);
     } else {
-        user = { uid: "admin-uid", email: "admin@sps.edu", displayName: "Principal Administrator" };
+        user = { uid: "admin-uid", email: "admin@sds.edu", displayName: "Principal Administrator" };
         const users = getStore("users", {});
-        users["admin-uid"] = { uid: "admin-uid", email: "admin@sps.edu", name: "Principal Administrator", role: "admin", createdAt: Date.now() };
+        users["admin-uid"] = { uid: "admin-uid", email: "admin@sds.edu", name: "Principal Administrator", role: "admin", createdAt: Date.now() };
         setStore("users", users);
     }
     triggerAuthListeners(user);

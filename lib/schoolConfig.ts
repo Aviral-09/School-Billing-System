@@ -4,8 +4,8 @@
  * Change these values to rebrand the system for your institution.
  */
 export const SCHOOL_CONFIG = {
-    name: 'Sunrise Public School',
-    shortName: 'SPS',
+    name: 'Swaami Dayanand Saraswati Public School',
+    shortName: 'SDS',
     tagline: 'Empowering Students, Building Futures',
     email: 'admin@sunrisepublicschool.edu.in',
     phone: '+91 98765 43210',
